@@ -19,22 +19,19 @@ class StylePreprocessor(Preprocessor):
     )
 
     def preprocess(self, nb, resources):
-        """
-        Preprocess the entire notebook.
+        """Preprocess the entire notebook.
 
-        Parameters
-        ----------
-        nb : NotebookNode
-            The notebook to preprocess
-        resources : dict
-            Additional resources used in the conversion process
+        Args:
+            nb (NotebookNode):
+                The notebook to preprocess
+            resources (dict):
+                Additional resources used in the conversion process
 
-        Returns
-        -------
-        nb : NotebookNode
-            The processed notebook
-        resources : dict
-            Updated resources
+        Returns:
+            nb (NotebookNode):
+                The processed notebook
+            resources (dict):
+                Updated resources
         """
         # Initialize style collection in resources
         if "styles" not in resources:
@@ -46,24 +43,21 @@ class StylePreprocessor(Preprocessor):
         return nb, resources
 
     def preprocess_cell(self, cell, resources, index):
-        """
-        Preprocess a single cell.
+        """Preprocess a single cell.
 
-        Parameters
-        ----------
-        cell : NotebookNode
-            The cell to preprocess
-        resources : dict
-            Additional resources used in the conversion process
-        index : int
-            The index of the cell in the notebook
+        Args:
+            cell (NotebookNode):
+                The cell to preprocess
+            resources (dict):
+                Additional resources used in the conversion process
+            index (int):
+                The index of the cell in the notebook
 
-        Returns
-        -------
-        cell : NotebookNode
-            The processed cell
-        resources : dict
-            Updated resources
+        Returns:
+            cell (NotebookNode):
+                The processed cell
+            resources (dict):
+                Updated resources
         """
         # Check if cell has style metadata
         if "metadata" in cell and self.style_metadata_key in cell.metadata:
