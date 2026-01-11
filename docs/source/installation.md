@@ -2,7 +2,7 @@
 
 ## Requirements
 
-- Python 3.8 or higher
+- Python 3.11 or higher
 - JupyterLab 4.0 or higher (for JupyterLab extension features)
 - nbconvert 6.0 or higher
 

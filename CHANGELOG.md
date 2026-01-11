@@ -31,7 +31,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - pyproject.toml with modern build configuration
 - Conda recipe for conda-forge distribution
 - GitHub Actions for automated building and testing
-- Support for Python 3.8+
+- Support for Python 3.11+
 
 [Unreleased]: https://github.com/gb119/jupyter_export_html_style/compare/v0.1.0...HEAD
 [0.1.0]: https://github.com/gb119/jupyter_export_html_style/releases/tag/v0.1.0

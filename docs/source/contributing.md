@@ -6,7 +6,7 @@ Thank you for considering contributing to Jupyter Export HTML Style!
 
 ### Prerequisites
 
-- Python 3.8+
+- Python 3.11+
 - Git
 - pip or conda
 
