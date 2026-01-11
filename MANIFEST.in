@@ -1,0 +1,9 @@
+include README.md
+include LICENSE
+include pyproject.toml
+recursive-include jupyter_export_html_style *.py
+recursive-include docs *.md *.py *.rst *.bat Makefile
+include conda.recipe/meta.yaml
+global-exclude __pycache__
+global-exclude *.py[co]
+global-exclude .DS_Store
