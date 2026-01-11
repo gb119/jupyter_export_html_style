@@ -1,64 +1,237 @@
-# jupyter_export_html_style
+# Jupyter Export HTML Style
 
-A Jupyter nbconvert exporter that exports notebooks as HTML with support for cell-level style metadata overrides.
+[![Build Status](https://github.com/gb119/jupyter_export_html_style/workflows/Build%20and%20Test/badge.svg)](https://github.com/gb119/jupyter_export_html_style/actions)
+[![PyPI version](https://badge.fury.io/py/jupyter-export-html-style.svg)](https://pypi.org/project/jupyter-export-html-style/)
+[![Conda Version](https://img.shields.io/conda/vn/phygbu/jupyter-export-html-style.svg)](https://anaconda.org/phygbu/jupyter-export-html-style)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
+A JupyterLab extension and nbconvert preprocessor/exporter that allows custom cell-level styling when exporting notebooks to HTML.
 
 ## Features
 
-- Inherits from the standard HTML exporter
-- Automatically embeds images in the output HTML
-- Extracts `style` metadata from notebook cells
-- Applies custom styles to cell div elements in the HTML output
+- 🎨 **Custom Cell Styling**: Apply CSS styles to individual cells via metadata
+- 🔧 **nbconvert Integration**: Seamlessly integrates with nbconvert's export pipeline
+- 🚀 **Easy to Use**: Simple metadata-based configuration
+- 📦 **Multiple Distribution Channels**: Available via pip and conda
+- 🔌 **Extensible**: Built on nbconvert's preprocessor architecture
 
 ## Installation
 
+### Using pip
+
 ```bash
+pip install jupyter-export-html-style
+```
+
+### Using conda
+
+```bash
+conda install -c phygbu jupyter-export-html-style
+```
+
+### From source
+
+```bash
+git clone https://github.com/gb119/jupyter_export_html_style.git
+cd jupyter_export_html_style
 pip install -e .
 ```
 
-## Usage
+## Quick Start
 
-### Command Line
+### 1. Add Style Metadata to Cells
 
-Export a notebook using the custom exporter:
-
-```bash
-jupyter nbconvert --to html_style example_notebook.ipynb
-```
-
-### Python API
-
-```python
-from jupyter_export_html_style import HTMLStyleExporter
-
-# Create exporter instance
-exporter = HTMLStyleExporter()
-
-# Export notebook
-(body, resources) = exporter.from_filename('example_notebook.ipynb')
-
-# Save to file
-with open('output.html', 'w') as f:
-    f.write(body)
-```
-
-### Adding Style Metadata to Cells
-
-To add custom styles to a cell, edit the cell metadata in Jupyter and add a `style` key with CSS properties:
+In your Jupyter notebook, add style metadata to cells:
 
 ```json
 {
-  "style": "background-color: #e3f2fd; padding: 10px; border-left: 5px solid #2196f3;"
+  "metadata": {
+    "style": {
+      "background-color": "#f0f0f0",
+      "border": "2px solid #333",
+      "padding": "10px"
+    }
+  }
 }
 ```
 
-The styles will be applied as inline CSS to the cell's div element in the exported HTML.
+### 2. Export with Custom Styles
 
-## Example
+From the command line:
 
-See `example_notebook.ipynb` for a demonstration of cells with custom styles.
+```bash
+jupyter nbconvert --to styled_html notebook.ipynb
+```
 
-## Components
+Or using Python:
 
-- **HTMLStyleExporter**: Custom HTML exporter that embeds images and uses style-aware templates
-- **StyleMetadataPreprocessor**: Preprocessor that extracts style metadata from cells
-- **html_style.html.j2**: Custom Jinja2 template that includes style attributes in cell divs
+```python
+from jupyter_export_html_style import StyledHTMLExporter
+
+exporter = StyledHTMLExporter()
+(body, resources) = exporter.from_filename('notebook.ipynb')
+```
+
+## Usage Examples
+
+### Highlighting Important Cells
+
+```json
+{
+  "style": {
+    "background-color": "#fff9c4",
+    "border": "2px dashed #fbc02d"
+  }
+}
+```
+
+### Error/Warning Styling
+
+```json
+{
+  "style": {
+    "background-color": "#ffebee",
+    "border-left": "5px solid #f44336"
+  }
+}
+```
+
+### Custom CSS Strings
+
+```json
+{
+  "style": "background: linear-gradient(to right, #667eea 0%, #764ba2 100%); color: white; padding: 15px;"
+}
+```
+
+## Building from Source
+
+### Building Python Wheels
+
+```bash
+pip install build
+python -m build
+```
+
+The wheel and source distribution will be created in the `dist/` directory.
+
+### Building Conda Packages
+
+```bash
+conda install conda-build
+conda build conda.recipe
+```
+
+The conda package will be built in your conda-bld directory.
+
+## Documentation
+
+Full documentation is available at [https://jupyter-export-html-style.readthedocs.io](https://jupyter-export-html-style.readthedocs.io)
+
+- [Installation Guide](docs/source/installation.md)
+- [Usage Guide](docs/source/usage.md)
+- [API Reference](docs/source/api.md)
+- [Contributing](docs/source/contributing.md)
+
+## Development
+
+### Setting Up Development Environment
+
+```bash
+# Clone the repository
+git clone https://github.com/gb119/jupyter_export_html_style.git
+cd jupyter_export_html_style
+
+# Create virtual environment
+python -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
+
+# Install in development mode
+pip install -e ".[dev,docs]"
+```
+
+### Running Tests
+
+```bash
+pytest
+```
+
+### Code Quality
+
+```bash
+# Format code
+black jupyter_export_html_style
+
+# Lint code
+ruff check jupyter_export_html_style
+
+# Type check
+mypy jupyter_export_html_style
+```
+
+## Project Structure
+
+```
+jupyter_export_html_style/
+├── jupyter_export_html_style/    # Main Python package
+│   ├── __init__.py              # Package initialization
+│   ├── preprocessor.py          # nbconvert preprocessor
+│   └── exporter.py              # Custom HTML exporter
+├── docs/                        # Documentation
+│   ├── source/                  # Sphinx documentation source
+│   │   ├── index.md
+│   │   ├── installation.md
+│   │   ├── usage.md
+│   │   ├── api.md
+│   │   └── contributing.md
+│   ├── Makefile                # Documentation build (Unix)
+│   └── make.bat                # Documentation build (Windows)
+├── conda.recipe/               # Conda build recipe
+│   └── meta.yaml              # Conda package metadata
+├── .github/                   # GitHub configuration
+│   └── workflows/            # CI/CD workflows
+│       ├── build.yml         # Build and test workflow
+│       └── docs.yml          # Documentation build workflow
+├── pyproject.toml            # Project metadata and build configuration
+├── README.md                 # This file
+├── LICENSE                   # MIT License
+└── .gitignore               # Git ignore patterns
+```
+
+## Contributing
+
+Contributions are welcome! Please see [CONTRIBUTING.md](docs/source/contributing.md) for details.
+
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## Acknowledgments
+
+- Built on top of [nbconvert](https://github.com/jupyter/nbconvert)
+- Designed for use with [JupyterLab](https://github.com/jupyterlab/jupyterlab)
+
+## Support
+
+- **Issues**: [GitHub Issues](https://github.com/gb119/jupyter_export_html_style/issues)
+- **Discussions**: [GitHub Discussions](https://github.com/gb119/jupyter_export_html_style/discussions)
+- **Documentation**: [Read the Docs](https://jupyter-export-html-style.readthedocs.io)
+
+## Citation
+
+If you use this project in your research, please cite:
+
+```bibtex
+@software{jupyter_export_html_style,
+  author = {Burnell, Gavin},
+  title = {Jupyter Export HTML Style},
+  year = {2026},
+  url = {https://github.com/gb119/jupyter_export_html_style}
+}
+```

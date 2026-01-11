@@ -1,0 +1,128 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "jupyter-export-html-style"
+version = "0.1.0"
+description = "A JupyterLab extension and nbconvert preprocessor/exporter for HTML export with cell style metadata overrides"
+authors = [
+    {name = "Gavin Burnell", email = "gavin.burnell@example.com"}
+]
+license = "MIT"
+readme = "README.md"
+requires-python = ">=3.11"
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Framework :: Jupyter",
+    "Framework :: Jupyter :: JupyterLab",
+    "Framework :: Jupyter :: JupyterLab :: 4",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Science/Research",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+]
+keywords = ["jupyter", "jupyterlab", "nbconvert", "html", "export", "notebook"]
+
+dependencies = [
+    "nbconvert>=6.0.0",
+    "traitlets>=5.0.0",
+    "jupyter-core>=4.7.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0.0",
+    "pytest-cov>=4.0.0",
+    "black>=23.0.0",
+    "ruff>=0.1.0",
+    "mypy>=1.0.0",
+]
+docs = [
+    "sphinx>=5.0.0",
+    "sphinx-rtd-theme>=1.0.0",
+    "myst-parser>=0.18.0",
+]
+jupyterlab = [
+    "jupyterlab>=4.0.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/gb119/jupyter_export_html_style"
+Documentation = "https://jupyter-export-html-style.readthedocs.io"
+Repository = "https://github.com/gb119/jupyter_export_html_style"
+"Bug Tracker" = "https://github.com/gb119/jupyter_export_html_style/issues"
+
+[project.entry-points."nbconvert.preprocessors"]
+style = "jupyter_export_html_style.preprocessor:StylePreprocessor"
+
+[project.entry-points."nbconvert.exporters"]
+styled_html = "jupyter_export_html_style.exporter:StyledHTMLExporter"
+
+[tool.setuptools]
+packages = ["jupyter_export_html_style"]
+
+[tool.setuptools.package-data]
+jupyter_export_html_style = ["py.typed"]
+
+[tool.black]
+line-length = 100
+target-version = ["py311", "py312", "py313"]
+include = '\.pyi?$'
+extend-exclude = '''
+/(
+  # directories
+  \.eggs
+  | \.git
+  | \.hg
+  | \.mypy_cache
+  | \.tox
+  | \.venv
+  | build
+  | dist
+)/
+'''
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = [
+    "E",  # pycodestyle errors
+    "W",  # pycodestyle warnings
+    "F",  # pyflakes
+    "I",  # isort
+    "B",  # flake8-bugbear
+    "C4", # flake8-comprehensions
+    "UP", # pyupgrade
+]
+ignore = [
+    "E501",  # line too long, handled by black
+    "B008",  # do not perform function calls in argument defaults
+    "C901",  # too complex
+]
+
+[tool.ruff.lint.per-file-ignores]
+"__init__.py" = ["F401"]
+
+[tool.mypy]
+python_version = "3.11"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = false
+disallow_incomplete_defs = false
+check_untyped_defs = true
+no_implicit_optional = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+warn_no_return = true
+
+[tool.pytest.ini_options]
+minversion = "7.0"
+addopts = "-ra -q --strict-markers --cov=jupyter_export_html_style --cov-report=term-missing"
+testpaths = ["tests"]
+pythonpath = ["."]

@@ -1,45 +1,89 @@
 """
-Custom HTML Exporter with style metadata support.
+Custom HTML exporter with style support.
 """
 
 from nbconvert.exporters import HTMLExporter
-from traitlets import default
-from .preprocessor import StyleMetadataPreprocessor
-import os
+from traitlets import Unicode
+
+from .preprocessor import StylePreprocessor
 
 
-class HTMLStyleExporter(HTMLExporter):
+class StyledHTMLExporter(HTMLExporter):
     """
-    HTML Exporter that:
-    1. Embeds images by default
-    2. Extracts style metadata from cells using StyleMetadataPreprocessor
-    3. Uses a custom cell template to apply styles to cell divs
+    An HTML exporter that supports cell-level style customization.
+
+    This exporter extends the standard HTMLExporter to include
+    custom styles defined in cell metadata.
     """
-    
-    @default('embed_images')
-    def _embed_images_default(self):
-        """
-        Default to embedding images in the HTML output.
-        """
-        return True
-    
-    @default('template_name')
-    def _template_name_default(self):
-        """
-        Use custom template that includes style support.
-        """
-        return 'html_style'
-    
+
+    export_from_notebook = "Styled HTML Export"
+
+    # Custom template file (can be overridden)
+    template_name = Unicode("classic", help="Name of the template to use").tag(config=True)
+
     def __init__(self, **kw):
-        """
-        Initialize the exporter with custom preprocessor and template.
-        """
-        # Set extra_template_basedirs before calling super().__init__
-        if 'extra_template_basedirs' not in kw:
-            template_dir = os.path.join(os.path.dirname(__file__), 'templates')
-            kw['extra_template_basedirs'] = [template_dir]
-        
+        """Initialize the exporter."""
         super().__init__(**kw)
-        
-        # Add our custom preprocessor
-        self.register_preprocessor(StyleMetadataPreprocessor, enabled=True)
+
+        # Register the style preprocessor
+        self.register_preprocessor(StylePreprocessor, enabled=True)
+
+    def from_notebook_node(self, nb, resources=None, **kw):
+        """
+        Convert a notebook node to HTML with style support.
+
+        Parameters
+        ----------
+        nb : NotebookNode
+            The notebook to convert
+        resources : dict, optional
+            Additional resources used in the conversion process
+        **kw : dict
+            Additional keyword arguments
+
+        Returns
+        -------
+        output : str
+            The HTML output
+        resources : dict
+            Updated resources
+        """
+        # Process the notebook with our preprocessor
+        output, resources = super().from_notebook_node(nb, resources, **kw)
+
+        # Add custom styling section if styles were collected
+        if resources and "styles" in resources and resources["styles"]:
+            style_block = self._generate_style_block(resources["styles"])
+            # Insert style block into HTML (before </head>)
+            if "</head>" in output:
+                output = output.replace("</head>", f"{style_block}</head>")
+
+        return output, resources
+
+    def _generate_style_block(self, styles):
+        """
+        Generate a CSS style block from collected styles.
+
+        Parameters
+        ----------
+        styles : dict
+            Dictionary mapping cell IDs to style definitions
+
+        Returns
+        -------
+        str
+            CSS style block
+        """
+        css_rules = []
+        for cell_id, style in styles.items():
+            if isinstance(style, dict):
+                # Convert style dict to CSS
+                style_str = "; ".join(f"{k}: {v}" for k, v in style.items())
+                css_rules.append(f"#{cell_id} {{ {style_str} }}")
+            elif isinstance(style, str):
+                # Direct CSS string
+                css_rules.append(f"#{cell_id} {{ {style} }}")
+
+        if css_rules:
+            return "\n<style>\n/* Custom cell styles */\n" + "\n".join(css_rules) + "\n</style>\n"
+        return ""
