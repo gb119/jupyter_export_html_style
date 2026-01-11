@@ -114,9 +114,15 @@ jobs:
       shell: bash -l {0}
       run: |
         conda build conda.recipe
+        # Find and save the package path
+        CONDA_BLD_PATH=$(conda info --base)/conda-bld
+        PKG_PATH=$(find $CONDA_BLD_PATH -name "jupyter-export-html-style*.tar.bz2" | head -1)
+        echo "PKG_PATH=$PKG_PATH" >> $GITHUB_ENV
+        echo "Found package at: $PKG_PATH"
     
     - name: Upload conda package artifact
       uses: actions/upload-artifact@v4
+      if: env.PKG_PATH != ''
       with:
         name: conda-package
-        path: /usr/share/miniconda/envs/test/conda-bld/noarch/*.tar.bz2
+        path: ${{ env.PKG_PATH }}
