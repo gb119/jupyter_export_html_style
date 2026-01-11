@@ -1,3 +1,16 @@
+# Build and Test Workflow
+#
+# This workflow builds and tests the package, creating Python wheels and Conda packages.
+#
+# Required secrets for publishing (not used in this workflow, but documented for reference):
+#   ANACONDA_TOKEN: Anaconda Cloud API token for uploading conda packages
+#                   (used with: anaconda upload --token $ANACONDA_TOKEN <package>)
+#   PYPI_TOKEN: PyPI API token for uploading Python packages
+#               (used with: python -m twine upload --username __token__ --password $PYPI_TOKEN dist/*)
+#
+# Note: Modern conda-build (3.18+) creates .conda package format by default,
+#       but may also create .tar.bz2 packages. This workflow handles both formats.
+
 name: Build and Test
 
 on:
@@ -121,8 +134,9 @@ jobs:
       run: |
         conda build conda.recipe
         # Find and save the package path
+        # Modern conda-build creates .conda packages, but may also create .tar.bz2
         CONDA_BLD_PATH=$(conda info --base)/conda-bld
-        PKG_PATH=$(find $CONDA_BLD_PATH -name "jupyter-export-html-style*.tar.bz2" | head -1)
+        PKG_PATH=$(find $CONDA_BLD_PATH -name "jupyter-export-html-style*.conda" -o -name "jupyter-export-html-style*.tar.bz2" | head -1)
         echo "PKG_PATH=$PKG_PATH" >> $GITHUB_ENV
         echo "Found package at: $PKG_PATH"
     
