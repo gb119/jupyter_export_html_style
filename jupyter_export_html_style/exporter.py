@@ -29,24 +29,21 @@ class StyledHTMLExporter(HTMLExporter):
         self.register_preprocessor(StylePreprocessor, enabled=True)
 
     def from_notebook_node(self, nb, resources=None, **kw):
-        """
-        Convert a notebook node to HTML with style support.
+        """Convert a notebook node to HTML with style support.
 
-        Parameters
-        ----------
-        nb : NotebookNode
-            The notebook to convert
-        resources : dict, optional
-            Additional resources used in the conversion process
-        **kw : dict
-            Additional keyword arguments
+        Args:
+            nb (NotebookNode):
+                The notebook to convert
+            resources (dict, optional):
+                Additional resources used in the conversion process
+            **kw (dict):
+                Additional keyword arguments
 
-        Returns
-        -------
-        output : str
-            The HTML output
-        resources : dict
-            Updated resources
+        Returns:
+            output (str):
+                The HTML output
+            resources (dict):
+                Updated resources
         """
         # Process the notebook with our preprocessor
         output, resources = super().from_notebook_node(nb, resources, **kw)
@@ -61,18 +58,15 @@ class StyledHTMLExporter(HTMLExporter):
         return output, resources
 
     def _generate_style_block(self, styles):
-        """
-        Generate a CSS style block from collected styles.
+        """Generate a CSS style block from collected styles.
 
-        Parameters
-        ----------
-        styles : dict
-            Dictionary mapping cell IDs to style definitions
+        Args:
+            styles (dict):
+                Dictionary mapping cell IDs to style definitions
 
-        Returns
-        -------
-        str
-            CSS style block
+        Returns:
+            str:
+                CSS style block
         """
         css_rules = []
         for cell_id, style in styles.items():
