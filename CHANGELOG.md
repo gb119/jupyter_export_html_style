@@ -29,7 +29,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Build System
 - pyproject.toml with modern build configuration
-- Conda recipe for conda-forge distribution
+- Conda recipe for phygbu distribution
 - GitHub Actions for automated building and testing
 - Support for Python 3.11+
 

@@ -37,7 +37,7 @@ pip install jupyter-export-html-style
 Or via conda:
 
 ```bash
-conda install -c conda-forge jupyter-export-html-style
+conda install -c phygbu jupyter-export-html-style
 ```
 
 ### Basic Usage

@@ -108,7 +108,7 @@ jobs:
       with:
         auto-update-conda: true
         python-version: '3.11'
-        channels: conda-forge,defaults
+        channels: phygbu,conda-forge,defaults
         channel-priority: true
     
     - name: Install conda-build

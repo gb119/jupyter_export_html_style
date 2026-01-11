@@ -2,7 +2,7 @@
 
 [![Build Status](https://github.com/gb119/jupyter_export_html_style/workflows/Build%20and%20Test/badge.svg)](https://github.com/gb119/jupyter_export_html_style/actions)
 [![PyPI version](https://badge.fury.io/py/jupyter-export-html-style.svg)](https://pypi.org/project/jupyter-export-html-style/)
-[![Conda Version](https://img.shields.io/conda/vn/conda-forge/jupyter-export-html-style.svg)](https://anaconda.org/conda-forge/jupyter-export-html-style)
+[![Conda Version](https://img.shields.io/conda/vn/phygbu/jupyter-export-html-style.svg)](https://anaconda.org/phygbu/jupyter-export-html-style)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 A JupyterLab extension and nbconvert preprocessor/exporter that allows custom cell-level styling when exporting notebooks to HTML.
@@ -26,7 +26,7 @@ pip install jupyter-export-html-style
 ### Using conda
 
 ```bash
-conda install -c conda-forge jupyter-export-html-style
+conda install -c phygbu jupyter-export-html-style
 ```
 
 ### From source

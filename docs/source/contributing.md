@@ -169,7 +169,7 @@ pip install twine
 twine upload dist/*
 ```
 
-For conda-forge, update the feedstock repository.
+For phygbu channel, upload using anaconda-client.
 
 ## Documentation Guidelines
 
