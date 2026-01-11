@@ -162,14 +162,38 @@ conda build conda.recipe
 
 ### Publishing
 
-Maintainers can publish to PyPI:
+Maintainers can publish packages to PyPI and Anaconda Cloud.
+
+#### Publishing to PyPI
 
 ```bash
 pip install twine
-twine upload dist/*
+# Using token authentication (recommended)
+python -m twine upload --username __token__ --password $PYPI_TOKEN dist/*
 ```
 
-For phygbu channel, upload using anaconda-client.
+Set the `PYPI_TOKEN` environment variable or GitHub secret with your PyPI API token.
+
+#### Publishing to Anaconda Cloud
+
+Modern conda-build (3.18+) creates `.conda` format packages by default, which are more efficient than `.tar.bz2` packages.
+
+```bash
+conda install anaconda-client
+# Find the built package (supports both .conda and .tar.bz2 formats)
+anaconda upload --token $ANACONDA_TOKEN $(conda info --base)/conda-bld/noarch/jupyter-export-html-style-*.conda
+# Or if using older format:
+anaconda upload --token $ANACONDA_TOKEN $(conda info --base)/conda-bld/noarch/jupyter-export-html-style-*.tar.bz2
+```
+
+Set the `ANACONDA_TOKEN` environment variable or GitHub secret with your Anaconda Cloud API token.
+
+#### Required GitHub Secrets for CI/CD
+
+If setting up automated publishing in GitHub Actions, configure these secrets in your repository settings:
+
+- `ANACONDA_TOKEN`: API token from Anaconda Cloud for uploading conda packages
+- `PYPI_TOKEN`: API token from PyPI for uploading Python packages
 
 ## Documentation Guidelines
 
