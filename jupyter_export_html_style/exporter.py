@@ -23,15 +23,6 @@ class HTMLStyleExporter(HTMLExporter):
         """
         return True
     
-    def __init__(self, **kw):
-        """
-        Initialize the exporter with custom preprocessor and template.
-        """
-        super().__init__(**kw)
-        
-        # Add our custom preprocessor
-        self.register_preprocessor(StyleMetadataPreprocessor, enabled=True)
-    
     @default('template_name')
     def _template_name_default(self):
         """
@@ -39,13 +30,16 @@ class HTMLStyleExporter(HTMLExporter):
         """
         return 'html_style'
     
-    @property
-    def template_paths(self):
+    def __init__(self, **kw):
         """
-        Return the paths to look for templates.
+        Initialize the exporter with custom preprocessor and template.
         """
-        paths = super().template_paths
-        # Add our custom template directory
-        template_dir = os.path.join(os.path.dirname(__file__), 'templates')
-        paths.insert(0, template_dir)
-        return paths
+        # Set extra_template_basedirs before calling super().__init__
+        if 'extra_template_basedirs' not in kw:
+            template_dir = os.path.join(os.path.dirname(__file__), 'templates')
+            kw['extra_template_basedirs'] = [template_dir]
+        
+        super().__init__(**kw)
+        
+        # Add our custom preprocessor
+        self.register_preprocessor(StyleMetadataPreprocessor, enabled=True)
