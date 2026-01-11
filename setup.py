@@ -3,7 +3,7 @@ from setuptools import setup, find_packages
 setup(
     name='jupyter_export_html_style',
     version='0.1.0',
-    description='A Jupyterlab extension that exports notebooks as HTML with cell style metadata overrides',
+    description='A JupyterLab extension that exports notebooks as HTML with cell style metadata overrides',
     author='gb119',
     packages=find_packages(),
     install_requires=[

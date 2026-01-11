@@ -21,8 +21,9 @@ class StyleMetadataPreprocessor(Preprocessor):
         
         Removes potentially dangerous patterns like:
         - JavaScript execution (expression, behavior, -moz-binding)
-        - URL with javascript: protocol
+        - URL with javascript: protocol (with whitespace obfuscation handling)
         - Import statements
+        - Data URLs that could contain scripts
         
         Parameters
         ----------
@@ -38,23 +39,29 @@ class StyleMetadataPreprocessor(Preprocessor):
             return ''
         
         # Remove potentially dangerous CSS patterns
-        # Remove javascript: urls
-        style = re.sub(r'javascript\s*:', '', style, flags=re.IGNORECASE)
+        # Remove javascript: urls (including whitespace obfuscation)
+        style = re.sub(r'j\s*a\s*v\s*a\s*s\s*c\s*r\s*i\s*p\s*t\s*:', '', style, flags=re.IGNORECASE)
         
-        # Remove expression() (IE specific)
-        style = re.sub(r'expression\s*\([^)]*\)', '', style, flags=re.IGNORECASE)
+        # Remove expression() (IE specific) - including whitespace variants
+        style = re.sub(r'e\s*x\s*p\s*r\s*e\s*s\s*s\s*i\s*o\s*n\s*\([^)]*\)', '', style, flags=re.IGNORECASE)
         
         # Remove behavior property (IE specific)
-        style = re.sub(r'behavior\s*:', '', style, flags=re.IGNORECASE)
+        style = re.sub(r'b\s*e\s*h\s*a\s*v\s*i\s*o\s*r\s*:', '', style, flags=re.IGNORECASE)
         
         # Remove -moz-binding (Firefox specific)
-        style = re.sub(r'-moz-binding\s*:', '', style, flags=re.IGNORECASE)
+        style = re.sub(r'-\s*m\s*o\s*z\s*-\s*b\s*i\s*n\s*d\s*i\s*n\s*g\s*:', '', style, flags=re.IGNORECASE)
         
-        # Remove @import
-        style = re.sub(r'@import', '', style, flags=re.IGNORECASE)
+        # Remove @import statements (including full statement)
+        style = re.sub(r'@\s*i\s*m\s*p\s*o\s*r\s*t[^;]*;?', '', style, flags=re.IGNORECASE)
         
-        # Remove any remaining HTML/script tags if they somehow got in
+        # Remove data: URLs as they could contain SVG with scripts
+        style = re.sub(r'data\s*:', '', style, flags=re.IGNORECASE)
+        
+        # Remove any HTML/script tags if they somehow got in
         style = re.sub(r'<[^>]*>', '', style)
+        
+        # Remove quotes to prevent attribute breaking
+        style = style.replace('"', "'")
         
         return style.strip()
     
