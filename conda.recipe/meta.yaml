@@ -23,7 +23,7 @@ requirements:
     - python >=3.11
     - nbconvert >=6.0.0
     - traitlets >=5.0.0
-    - jupyter-core >=4.7.0
+    - jupyter_core >=4.7.0
 
 test:
   imports:

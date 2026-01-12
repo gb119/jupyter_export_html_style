@@ -1,0 +1,42 @@
+CI detected...
+2 channel Terms of Service accepted
+Channels:
+ - conda-forge
+ - defaults
+Platform: linux-64
+Collecting package metadata (repodata.json): - \ | / - done
+Solving environment: | / done
+
+## Package Plan ##
+
+  environment location: /usr/share/miniconda
+
+  added / updated specs:
+    - jupyter_core
+
+
+The following packages will be downloaded:
+
+    package                    |            build
+    ---------------------------|-----------------
+    jupyter_core-5.9.1         |     pyhc90fa1f_0          64 KB  conda-forge
+    traitlets-5.14.3           |     pyhd8ed1ab_1         107 KB  conda-forge
+    ------------------------------------------------------------
+                                           Total:         171 KB
+
+The following NEW packages will be INSTALLED:
+
+  jupyter_core       conda-forge/noarch::jupyter_core-5.9.1-pyhc90fa1f_0 
+  traitlets          conda-forge/noarch::traitlets-5.14.3-pyhd8ed1ab_1 
+
+
+
+Downloading and Extracting Packages: ...working...traitlets-5.14.3     | 107 KB    |            |   0% 
+jupyter_core-5.9.1   | 64 KB     |            |   0% [A
+jupyter_core-5.9.1   | 64 KB     | ##5        |  25% [A
+jupyter_core-5.9.1   | 64 KB     | ########## | 100% [Atraitlets-5.14.3     | 107 KB    | #4         |  15% traitlets-5.14.3     | 107 KB    | ########## | 100% 
+jupyter_core-5.9.1   | 64 KB     | ########## | 100% [Atraitlets-5.14.3     | 107 KB    | ########## | 100%                                                      
+                                                     [A done
+Preparing transaction: \ done
+Verifying transaction: / done
+Executing transaction: \ | / - \ | / - \ | / - \ | / - \ done
