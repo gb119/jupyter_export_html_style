@@ -99,3 +99,74 @@ def test_custom_style_metadata_key():
     assert "styles" in resources
     assert len(resources["styles"]) == 1
     assert resources["styles"]["cell-0"]["color"] == "green"
+
+
+def test_integration_input_output_styles():
+    """Test full integration with input-style and output-style metadata."""
+    cells = [
+        new_code_cell("x = 1"),
+        new_code_cell("print('output')"),
+    ]
+
+    # Add input and output styles
+    cells[0].metadata["input-style"] = {"background-color": "#f9f9f9"}
+    cells[1].metadata["output-style"] = {"border": "1px dashed #999"}
+
+    nb = new_notebook(cells=cells)
+
+    exporter = StyledHTMLExporter()
+    output, resources = exporter.from_notebook_node(nb)
+
+    # Verify styles are present in output
+    assert "#cell-0-input" in output
+    assert "background-color: #f9f9f9" in output
+    assert "#cell-1-output" in output
+    assert "border: 1px dashed #999" in output
+
+
+def test_integration_notebook_level_styles():
+    """Test full integration with notebook-level style and stylesheet."""
+    nb = new_notebook(cells=[new_code_cell("a = 1"), new_markdown_cell("# Title")])
+
+    # Add notebook-level metadata
+    nb.metadata["style"] = ".jp-Cell { border-radius: 5px; }"
+    nb.metadata["stylesheet"] = "https://cdn.example.com/custom.css"
+
+    exporter = StyledHTMLExporter()
+    output, resources = exporter.from_notebook_node(nb)
+
+    # Verify notebook styles are present
+    assert "/* Custom notebook styles */" in output
+    assert ".jp-Cell { border-radius: 5px; }" in output
+    assert '<link rel="stylesheet" href="https://cdn.example.com/custom.css">' in output
+
+
+def test_integration_all_style_types():
+    """Test full integration with all style types together."""
+    cells = [
+        new_code_cell("x = 1"),
+        new_code_cell("y = 2"),
+    ]
+
+    # Add all types of styles
+    cells[0].metadata["style"] = {"margin": "10px"}
+    cells[0].metadata["input-style"] = {"color": "#333"}
+    cells[0].metadata["output-style"] = {"font-family": "monospace"}
+
+    nb = new_notebook(cells=cells)
+    nb.metadata["style"] = "body { max-width: 1200px; }"
+    nb.metadata["stylesheet"] = ["style1.css", "style2.css"]
+
+    exporter = StyledHTMLExporter()
+    output, resources = exporter.from_notebook_node(nb)
+
+    # Verify all styles are present
+    assert "#cell-0" in output
+    assert "margin: 10px" in output
+    assert "#cell-0-input" in output
+    assert "color: #333" in output
+    assert "#cell-0-output" in output
+    assert "font-family: monospace" in output
+    assert "body { max-width: 1200px; }" in output
+    assert '<link rel="stylesheet" href="style1.css">' in output
+    assert '<link rel="stylesheet" href="style2.css">' in output

@@ -36,6 +36,15 @@ class StylePreprocessor(Preprocessor):
         # Initialize style collection in resources
         if "styles" not in resources:
             resources["styles"] = {}
+        if "notebook_styles" not in resources:
+            resources["notebook_styles"] = {}
+
+        # Extract notebook-level style and stylesheet metadata
+        if hasattr(nb, "metadata"):
+            if "style" in nb.metadata:
+                resources["notebook_styles"]["style"] = nb.metadata["style"]
+            if "stylesheet" in nb.metadata:
+                resources["notebook_styles"]["stylesheet"] = nb.metadata["stylesheet"]
 
         # Process each cell
         nb, resources = super().preprocess(nb, resources)
@@ -59,6 +68,8 @@ class StylePreprocessor(Preprocessor):
             resources (dict):
                 Updated resources
         """
+        cell_id = f"cell-{index}"
+
         # Check if cell has style metadata
         if "metadata" in cell and self.style_metadata_key in cell.metadata:
             style = cell.metadata[self.style_metadata_key]
@@ -67,7 +78,24 @@ class StylePreprocessor(Preprocessor):
             cell.metadata["cell_style"] = style
 
             # Also collect in resources for global style processing
-            cell_id = f"cell-{index}"
             resources["styles"][cell_id] = style
+
+        # Check for input-style metadata
+        if "metadata" in cell and "input-style" in cell.metadata:
+            input_style = cell.metadata["input-style"]
+            cell.metadata["input_cell_style"] = input_style
+
+            # Collect in resources for CSS generation
+            input_id = f"{cell_id}-input"
+            resources["styles"][input_id] = input_style
+
+        # Check for output-style metadata
+        if "metadata" in cell and "output-style" in cell.metadata:
+            output_style = cell.metadata["output-style"]
+            cell.metadata["output_cell_style"] = output_style
+
+            # Collect in resources for CSS generation
+            output_id = f"{cell_id}-output"
+            resources["styles"][output_id] = output_style
 
         return cell, resources
