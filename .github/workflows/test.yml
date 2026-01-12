@@ -1,0 +1,59 @@
+# Test Workflow
+#
+# This workflow runs tests, linting, and type checking on every commit.
+# It is triggered on every push to main/develop branches and on all pull requests.
+
+name: Test
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+  workflow_dispatch:
+
+jobs:
+  test:
+    name: Test on Python ${{ matrix.python-version }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    strategy:
+      matrix:
+        python-version: ['3.11', '3.12', '3.13']
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v5
+      with:
+        python-version: ${{ matrix.python-version }}
+    
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -e ".[dev]"
+    
+    - name: Lint with ruff
+      run: |
+        ruff check jupyter_export_html_style
+    
+    - name: Format check with black
+      run: |
+        black --check jupyter_export_html_style
+    
+    - name: Type check with mypy
+      run: |
+        mypy jupyter_export_html_style || true
+    
+    - name: Run tests
+      run: |
+        pytest --cov=jupyter_export_html_style --cov-report=xml --cov-report=term-missing
+    
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v4
+      if: matrix.python-version == '3.11'
+      with:
+        file: ./coverage.xml
+        fail_ci_if_error: false
