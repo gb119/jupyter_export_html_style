@@ -4,7 +4,7 @@
 #
 # Required secrets for publishing:
 #   ANACONDA_TOKEN: Anaconda Cloud API token for uploading conda packages
-#                   (used with: anaconda upload --token $ANACONDA_TOKEN <package>)
+#                   (set as ANACONDA_API_TOKEN environment variable for anaconda-client)
 #   PYPI_TOKEN: PyPI API token for uploading Python packages
 #               (used with: python -m twine upload --username __token__ --password $PYPI_TOKEN dist/*)
 #
@@ -109,6 +109,6 @@ jobs:
       shell: bash -l {0}
       if: env.PKG_PATH != ''
       env:
-        ANACONDA_TOKEN: ${{ secrets.ANACONDA_TOKEN }}
+        ANACONDA_API_TOKEN: ${{ secrets.ANACONDA_TOKEN }}
       run: |
-        anaconda upload --token $ANACONDA_TOKEN $PKG_PATH
+        anaconda upload $PKG_PATH
