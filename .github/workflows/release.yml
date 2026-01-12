@@ -63,7 +63,8 @@ jobs:
         TWINE_USERNAME: __token__
         TWINE_PASSWORD: ${{ secrets.PYPI_TOKEN }}
       run: |
-        twine upload dist/*
+        # --skip-existing prevents failures if version already uploaded (e.g., during manual re-runs)
+        twine upload --skip-existing dist/*
 
   build-conda:
     name: Build Conda Package
@@ -111,4 +112,5 @@ jobs:
       env:
         ANACONDA_API_TOKEN: ${{ secrets.ANACONDA_TOKEN }}
       run: |
-        anaconda upload $PKG_PATH
+        # --force allows overwriting existing packages (e.g., during manual re-runs)
+        anaconda upload --force $PKG_PATH
