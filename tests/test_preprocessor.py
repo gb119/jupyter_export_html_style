@@ -96,3 +96,95 @@ def test_preprocess_multiple_cells_with_styles():
     assert "cell-0" in resources["styles"]
     assert "cell-2" in resources["styles"]
     assert "cell-1" not in resources["styles"]
+
+
+def test_preprocess_cell_with_input_style():
+    """Test preprocessing a cell with input-style metadata."""
+    preprocessor = StylePreprocessor()
+
+    cell = new_code_cell("x = 1")
+    cell.metadata["input-style"] = {"background-color": "#f5f5f5", "padding": "5px"}
+
+    processed_cell, resources = preprocessor.preprocess_cell(cell, {"styles": {}}, 0)
+
+    assert "input_cell_style" in processed_cell.metadata
+    assert processed_cell.metadata["input_cell_style"]["background-color"] == "#f5f5f5"
+    assert "cell-0-input" in resources["styles"]
+
+
+def test_preprocess_cell_with_output_style():
+    """Test preprocessing a cell with output-style metadata."""
+    preprocessor = StylePreprocessor()
+
+    cell = new_code_cell("print('test')")
+    cell.metadata["output-style"] = {"border": "1px solid #ccc"}
+
+    processed_cell, resources = preprocessor.preprocess_cell(cell, {"styles": {}}, 0)
+
+    assert "output_cell_style" in processed_cell.metadata
+    assert processed_cell.metadata["output_cell_style"]["border"] == "1px solid #ccc"
+    assert "cell-0-output" in resources["styles"]
+
+
+def test_preprocess_cell_with_all_styles():
+    """Test preprocessing a cell with cell, input, and output styles."""
+    preprocessor = StylePreprocessor()
+
+    cell = new_code_cell("x = 42")
+    cell.metadata["style"] = {"margin": "10px"}
+    cell.metadata["input-style"] = {"background-color": "#e0e0e0"}
+    cell.metadata["output-style"] = {"color": "#333"}
+
+    processed_cell, resources = preprocessor.preprocess_cell(cell, {"styles": {}}, 1)
+
+    assert "cell_style" in processed_cell.metadata
+    assert "input_cell_style" in processed_cell.metadata
+    assert "output_cell_style" in processed_cell.metadata
+    assert "cell-1" in resources["styles"]
+    assert "cell-1-input" in resources["styles"]
+    assert "cell-1-output" in resources["styles"]
+
+
+def test_preprocess_notebook_with_notebook_level_style():
+    """Test preprocessing a notebook with notebook-level style metadata."""
+    preprocessor = StylePreprocessor()
+
+    nb = new_notebook(cells=[new_code_cell("print('hello')")])
+    nb.metadata["style"] = "body { font-family: Arial; }"
+
+    processed_nb, resources = preprocessor.preprocess(nb, {})
+
+    assert "notebook_styles" in resources
+    assert "style" in resources["notebook_styles"]
+    assert resources["notebook_styles"]["style"] == "body { font-family: Arial; }"
+
+
+def test_preprocess_notebook_with_stylesheet():
+    """Test preprocessing a notebook with stylesheet metadata."""
+    preprocessor = StylePreprocessor()
+
+    nb = new_notebook(cells=[new_code_cell("x = 1")])
+    nb.metadata["stylesheet"] = "https://example.com/custom.css"
+
+    processed_nb, resources = preprocessor.preprocess(nb, {})
+
+    assert "notebook_styles" in resources
+    assert "stylesheet" in resources["notebook_styles"]
+    assert resources["notebook_styles"]["stylesheet"] == "https://example.com/custom.css"
+
+
+def test_preprocess_notebook_with_multiple_stylesheets():
+    """Test preprocessing a notebook with multiple stylesheets."""
+    preprocessor = StylePreprocessor()
+
+    nb = new_notebook(cells=[new_code_cell("y = 2")])
+    nb.metadata["stylesheet"] = [
+        "https://example.com/style1.css",
+        "https://example.com/style2.css",
+    ]
+
+    processed_nb, resources = preprocessor.preprocess(nb, {})
+
+    assert "notebook_styles" in resources
+    assert "stylesheet" in resources["notebook_styles"]
+    assert len(resources["notebook_styles"]["stylesheet"]) == 2

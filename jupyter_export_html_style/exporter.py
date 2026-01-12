@@ -48,12 +48,25 @@ class StyledHTMLExporter(HTMLExporter):
         # Process the notebook with our preprocessor
         output, resources = super().from_notebook_node(nb, resources, **kw)
 
-        # Add custom styling section if styles were collected
+        # Prepare all custom style blocks to inject before </head>
+        style_blocks = []
+
+        # Add custom cell styling section if styles were collected
         if resources and "styles" in resources and resources["styles"]:
             style_block = self._generate_style_block(resources["styles"])
-            # Insert style block into HTML (before </head>)
-            if "</head>" in output:
-                output = output.replace("</head>", f"{style_block}</head>")
+            if style_block:
+                style_blocks.append(style_block)
+
+        # Add notebook-level styles and stylesheets
+        if resources and "notebook_styles" in resources:
+            notebook_style_block = self._generate_notebook_style_block(resources["notebook_styles"])
+            if notebook_style_block:
+                style_blocks.append(notebook_style_block)
+
+        # Insert all style blocks into HTML (before </head>)
+        if style_blocks and "</head>" in output:
+            combined_styles = "".join(style_blocks)
+            output = output.replace("</head>", f"{combined_styles}</head>")
 
         return output, resources
 
@@ -81,3 +94,34 @@ class StyledHTMLExporter(HTMLExporter):
         if css_rules:
             return "\n<style>\n/* Custom cell styles */\n" + "\n".join(css_rules) + "\n</style>\n"
         return ""
+
+    def _generate_notebook_style_block(self, notebook_styles):
+        """Generate style and stylesheet blocks from notebook-level metadata.
+
+        Args:
+            notebook_styles (dict):
+                Dictionary containing 'style' and/or 'stylesheet' keys
+
+        Returns:
+            str:
+                HTML containing style and/or link elements
+        """
+        blocks = []
+
+        # Add custom stylesheet link if provided
+        if "stylesheet" in notebook_styles:
+            stylesheet = notebook_styles["stylesheet"]
+            if isinstance(stylesheet, str):
+                blocks.append(f'\n<link rel="stylesheet" href="{stylesheet}">\n')
+            elif isinstance(stylesheet, list):
+                # Support multiple stylesheets
+                for ss in stylesheet:
+                    blocks.append(f'\n<link rel="stylesheet" href="{ss}">\n')
+
+        # Add custom inline styles if provided
+        if "style" in notebook_styles:
+            style = notebook_styles["style"]
+            if isinstance(style, str) and style.strip():
+                blocks.append(f"\n<style>\n/* Custom notebook styles */\n{style}\n</style>\n")
+
+        return "".join(blocks)

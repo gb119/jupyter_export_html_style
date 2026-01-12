@@ -98,3 +98,130 @@ def test_export_with_custom_template():
     except Exception:
         # Template might not exist, which is okay for this test
         pass
+
+
+def test_export_notebook_with_input_style():
+    """Test exporting a notebook with input-style metadata."""
+    exporter = StyledHTMLExporter()
+
+    cell = new_code_cell("x = 1")
+    cell.metadata["input-style"] = {"background-color": "#ffe"}
+
+    nb = new_notebook(cells=[cell])
+
+    output, resources = exporter.from_notebook_node(nb)
+
+    assert output is not None
+    assert "#cell-0-input" in output
+    assert "background-color: #ffe" in output
+
+
+def test_export_notebook_with_output_style():
+    """Test exporting a notebook with output-style metadata."""
+    exporter = StyledHTMLExporter()
+
+    cell = new_code_cell("print('output')")
+    cell.metadata["output-style"] = {"border": "2px solid blue"}
+
+    nb = new_notebook(cells=[cell])
+
+    output, resources = exporter.from_notebook_node(nb)
+
+    assert output is not None
+    assert "#cell-0-output" in output
+    assert "border: 2px solid blue" in output
+
+
+def test_export_notebook_with_all_cell_styles():
+    """Test exporting a notebook with cell, input, and output styles."""
+    exporter = StyledHTMLExporter()
+
+    cell = new_code_cell("y = 2")
+    cell.metadata["style"] = {"padding": "10px"}
+    cell.metadata["input-style"] = {"color": "red"}
+    cell.metadata["output-style"] = {"font-weight": "bold"}
+
+    nb = new_notebook(cells=[cell])
+
+    output, resources = exporter.from_notebook_node(nb)
+
+    assert output is not None
+    assert "#cell-0" in output
+    assert "#cell-0-input" in output
+    assert "#cell-0-output" in output
+
+
+def test_export_notebook_with_notebook_level_style():
+    """Test exporting a notebook with notebook-level style metadata."""
+    exporter = StyledHTMLExporter()
+
+    nb = new_notebook(cells=[new_code_cell("z = 3")])
+    nb.metadata["style"] = ".custom-class { color: green; }"
+
+    output, resources = exporter.from_notebook_node(nb)
+
+    assert output is not None
+    assert "/* Custom notebook styles */" in output
+    assert ".custom-class { color: green; }" in output
+
+
+def test_export_notebook_with_stylesheet():
+    """Test exporting a notebook with stylesheet metadata."""
+    exporter = StyledHTMLExporter()
+
+    nb = new_notebook(cells=[new_code_cell("a = 4")])
+    nb.metadata["stylesheet"] = "https://example.com/style.css"
+
+    output, resources = exporter.from_notebook_node(nb)
+
+    assert output is not None
+    assert '<link rel="stylesheet" href="https://example.com/style.css">' in output
+
+
+def test_export_notebook_with_multiple_stylesheets():
+    """Test exporting a notebook with multiple stylesheets."""
+    exporter = StyledHTMLExporter()
+
+    nb = new_notebook(cells=[new_code_cell("b = 5")])
+    nb.metadata["stylesheet"] = [
+        "https://example.com/style1.css",
+        "https://example.com/style2.css",
+    ]
+
+    output, resources = exporter.from_notebook_node(nb)
+
+    assert output is not None
+    assert '<link rel="stylesheet" href="https://example.com/style1.css">' in output
+    assert '<link rel="stylesheet" href="https://example.com/style2.css">' in output
+
+
+def test_generate_notebook_style_block_with_style():
+    """Test generating notebook style block with inline CSS."""
+    exporter = StyledHTMLExporter()
+
+    notebook_styles = {"style": "body { background: white; }"}
+    style_block = exporter._generate_notebook_style_block(notebook_styles)
+
+    assert "<style>" in style_block
+    assert "/* Custom notebook styles */" in style_block
+    assert "body { background: white; }" in style_block
+
+
+def test_generate_notebook_style_block_with_stylesheet():
+    """Test generating notebook style block with external stylesheet."""
+    exporter = StyledHTMLExporter()
+
+    notebook_styles = {"stylesheet": "https://cdn.example.com/theme.css"}
+    style_block = exporter._generate_notebook_style_block(notebook_styles)
+
+    assert '<link rel="stylesheet" href="https://cdn.example.com/theme.css">' in style_block
+
+
+def test_generate_notebook_style_block_empty():
+    """Test generating notebook style block with no styles."""
+    exporter = StyledHTMLExporter()
+
+    notebook_styles = {}
+    style_block = exporter._generate_notebook_style_block(notebook_styles)
+
+    assert style_block == ""
