@@ -6,6 +6,12 @@ from nbformat.v4 import new_code_cell, new_markdown_cell, new_notebook
 
 from jupyter_export_html_style import StyledHTMLExporter
 
+# Test image data: 1x1 red pixel PNG
+TEST_IMAGE_PNG = bytes.fromhex(
+    "89504e470d0a1a0a0000000d49484452000000010000000108060000001f15c489"
+    "0000000d49444154789c63f8cfc03f00050201055fc8f1d20000000049454e44ae426082"
+)
+
 
 def test_styled_html_exporter_initialization():
     """Test that StyledHTMLExporter can be initialized."""
@@ -248,17 +254,11 @@ def test_embed_images_with_markdown_image():
 
     import nbformat as nbf
 
-    # Create a real image file (1x1 red pixel PNG)
-    img_data = bytes.fromhex(
-        "89504e470d0a1a0a0000000d49484452000000010000000108060000001f15c489"
-        "0000000d49444154789c63f8cfc03f00050201055fc8f1d20000000049454e44ae426082"
-    )
-
     with tempfile.TemporaryDirectory() as tmpdir:
         # Create image file
         img_path = os.path.join(tmpdir, "test.png")
         with open(img_path, "wb") as f:
-            f.write(img_data)
+            f.write(TEST_IMAGE_PNG)
 
         # Create notebook with markdown cell referencing the image
         nb = nbf.v4.new_notebook()
@@ -287,17 +287,11 @@ def test_embed_images_disabled_keeps_file_reference():
 
     import nbformat as nbf
 
-    # Create a real image file (1x1 red pixel PNG)
-    img_data = bytes.fromhex(
-        "89504e470d0a1a0a0000000d49484452000000010000000108060000001f15c489"
-        "0000000d49444154789c63f8cfc03f00050201055fc8f1d20000000049454e44ae426082"
-    )
-
     with tempfile.TemporaryDirectory() as tmpdir:
         # Create image file
         img_path = os.path.join(tmpdir, "test.png")
         with open(img_path, "wb") as f:
-            f.write(img_data)
+            f.write(TEST_IMAGE_PNG)
 
         # Create notebook with markdown cell referencing the image
         nb = nbf.v4.new_notebook()
