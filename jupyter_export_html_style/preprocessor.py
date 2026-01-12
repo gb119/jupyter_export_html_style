@@ -10,8 +10,8 @@ class StylePreprocessor(Preprocessor):
     """A preprocessor that extracts and processes style metadata from notebook cells.
 
     This preprocessor looks for style-related metadata in cells and prepares
-    them for use in HTML export. It processes three types of style metadata:
-    cell-level styles, input-specific styles, and output-specific styles.
+    them for use in HTML export. It processes cell-level styles (general, input-
+    specific, and output-specific) as well as notebook-level styles.
 
     Attributes:
         style_metadata_key (Unicode): The metadata key to look for cell styles.
