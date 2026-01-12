@@ -500,6 +500,78 @@ def test_embed_images_disabled_keeps_file_reference():
         assert 'src="test.png"' in output, "File reference to test.png not found in output"
 
 
+def test_embed_attachment_in_html_img_tag():
+    """Test that attachments in HTML img tags are embedded when embed_images is True.
+
+    This test verifies the fix for the issue where <img src="attachment:...">
+    tags in markdown cells were not being embedded even when embed_images=True.
+    """
+    import base64
+
+    # Create a notebook with markdown cell containing HTML img tag with attachment
+    nb = new_notebook()
+    md_cell = new_markdown_cell('Test image: <img src="attachment:test.png" />')
+
+    # Add the image as an attachment to the cell
+    md_cell["attachments"] = {"test.png": {"image/png": base64.b64encode(TEST_IMAGE_PNG).decode("ascii")}}
+
+    nb.cells.append(md_cell)
+
+    # Export with default settings (embed_images=True)
+    exporter = StyledHTMLExporter()
+    output, resources = exporter.from_notebook_node(nb)
+
+    # Parse HTML and find img tags
+    soup = _parse_html(output)
+    img_tags = soup.find_all("img")
+
+    # Verify image is embedded as data URI
+    assert len(img_tags) > 0, "No img tags found in output"
+
+    # Verify that at least one img tag has a data URI
+    has_data_uri = False
+    for img in img_tags:
+        src = img.get("src", "")
+        if src.startswith("data:image/png;base64,"):
+            has_data_uri = True
+            break
+
+    assert has_data_uri, "No img tag with data URI found"
+
+    # Verify attachment URL is NOT present (replaced with data URI)
+    assert 'src="attachment:test.png"' not in output, "Attachment URL still present in output"
+    assert "attachment:test.png" not in output, "Attachment reference still present in output"
+
+
+def test_attachment_in_html_img_tag_disabled():
+    """Test that attachments in HTML img tags remain when embed_images is False.
+
+    This test verifies that when embed_images=False and attachment URLs are
+    in HTML img tags (not markdown syntax), they remain as attachment URLs
+    because the HTML embedding patch only runs when embed_images=True.
+    """
+    import base64
+
+    # Create a notebook with markdown cell containing HTML img tag with attachment
+    nb = new_notebook()
+    md_cell = new_markdown_cell('Test image: <img src="attachment:test.png" />')
+
+    # Add the image as an attachment to the cell
+    md_cell["attachments"] = {"test.png": {"image/png": base64.b64encode(TEST_IMAGE_PNG).decode("ascii")}}
+
+    nb.cells.append(md_cell)
+
+    # Export with embed_images=False
+    exporter = StyledHTMLExporter(embed_images=False)
+    output, resources = exporter.from_notebook_node(nb)
+
+    # When embed_images=False and using HTML img tags, the attachment URL remains
+    # because the HTML embedding only runs when embed_images=True
+    # Note: If using markdown syntax ![](attachment:...), the ExtractAttachmentsPreprocessor
+    # would convert it to a file path
+    assert 'src="attachment:test.png"' in output, "Attachment URL should remain when embed_images=False"
+
+
 def test_css_selectors_match_html_elements():
     """Test that CSS selectors match actual HTML element IDs.
 
