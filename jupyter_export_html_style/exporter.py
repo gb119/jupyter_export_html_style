@@ -9,11 +9,34 @@ from .preprocessor import StylePreprocessor
 
 
 class StyledHTMLExporter(HTMLExporter):
-    """
-    An HTML exporter that supports cell-level style customization.
+    """An HTML exporter that supports cell-level style customization.
 
-    This exporter extends the standard HTMLExporter to include
-    custom styles defined in cell metadata.
+    This exporter extends the standard HTMLExporter to include custom styles
+    defined in cell metadata. It automatically registers the StylePreprocessor
+    to handle style metadata extraction and generates appropriate CSS to apply
+    the styles during HTML export.
+
+    Attributes:
+        export_from_notebook (str): Label for the export option.
+        template_name (Unicode): Name of the template to use. Defaults to
+            "classic". Can be configured via traitlets config system.
+
+    Notes:
+        The exporter supports multiple types of styles:
+        - Cell-level styles via 'style' metadata
+        - Input-specific styles via 'input-style' metadata
+        - Output-specific styles via 'output-style' metadata
+        - Notebook-level inline styles via 'style' metadata
+        - Notebook-level external stylesheets via 'stylesheet' metadata
+
+        Style metadata can be provided as either:
+        - A dictionary of CSS property-value pairs
+        - A string containing CSS declarations
+
+    Examples:
+        >>> from jupyter_export_html_style import StyledHTMLExporter
+        >>> exporter = StyledHTMLExporter()
+        >>> output, resources = exporter.from_notebook_node(notebook)
     """
 
     export_from_notebook = "Styled HTML Export"
@@ -22,7 +45,12 @@ class StyledHTMLExporter(HTMLExporter):
     template_name = Unicode("classic", help="Name of the template to use").tag(config=True)
 
     def __init__(self, **kw):
-        """Initialize the exporter."""
+        """Initialize the exporter and register the style preprocessor.
+
+        Args:
+            **kw (dict): Additional keyword arguments passed to the parent
+                HTMLExporter class.
+        """
         super().__init__(**kw)
 
         # Register the style preprocessor
@@ -32,18 +60,16 @@ class StyledHTMLExporter(HTMLExporter):
         """Convert a notebook node to HTML with style support.
 
         Args:
-            nb (NotebookNode):
-                The notebook to convert
-            resources (dict, optional):
-                Additional resources used in the conversion process
-            **kw (dict):
-                Additional keyword arguments
+            nb (NotebookNode): The notebook to convert.
+            resources (dict, optional): Additional resources used in the conversion
+                process. If None, an empty dictionary is created. Defaults to None.
+            **kw (dict): Additional keyword arguments passed to the parent
+                from_notebook_node method.
 
         Returns:
-            output (str):
-                The HTML output
-            resources (dict):
-                Updated resources
+            (tuple): A tuple containing:
+                - output (str): The HTML output with injected style blocks.
+                - resources (dict): Updated resources dictionary.
         """
         # Process the notebook with our preprocessor
         output, resources = super().from_notebook_node(nb, resources, **kw)
@@ -74,12 +100,18 @@ class StyledHTMLExporter(HTMLExporter):
         """Generate a CSS style block from collected styles.
 
         Args:
-            styles (dict):
-                Dictionary mapping cell IDs to style definitions
+            styles (dict): Dictionary mapping cell IDs to style definitions.
+                Style definitions can be either dictionaries of CSS properties
+                or strings containing CSS declarations.
 
         Returns:
-            str:
-                CSS style block
+            (str): CSS style block wrapped in HTML <style> tags. Returns empty
+                string if no styles are provided.
+
+        Examples:
+            >>> exporter = StyledHTMLExporter()
+            >>> styles = {"cell-0": {"color": "red"}, "cell-1": "padding: 10px"}
+            >>> style_block = exporter._generate_style_block(styles)
         """
         css_rules = []
         for cell_id, style in styles.items():
@@ -99,12 +131,22 @@ class StyledHTMLExporter(HTMLExporter):
         """Generate style and stylesheet blocks from notebook-level metadata.
 
         Args:
-            notebook_styles (dict):
-                Dictionary containing 'style' and/or 'stylesheet' keys
+            notebook_styles (dict): Dictionary containing 'style' and/or
+                'stylesheet' keys. The 'style' key should contain inline CSS
+                as a string. The 'stylesheet' key can be either a string URL
+                or a list of string URLs to external stylesheets.
 
         Returns:
-            str:
-                HTML containing style and/or link elements
+            (str): HTML containing <style> and/or <link> elements. Returns empty
+                string if no notebook styles are provided.
+
+        Examples:
+            >>> exporter = StyledHTMLExporter()
+            >>> notebook_styles = {
+            ...     "style": "body { font-family: Arial; }",
+            ...     "stylesheet": "https://example.com/style.css"
+            ... }
+            >>> html = exporter._generate_notebook_style_block(notebook_styles)
         """
         blocks = []
 

@@ -7,11 +7,28 @@ from traitlets import Unicode
 
 
 class StylePreprocessor(Preprocessor):
-    """
-    A preprocessor that extracts and processes style metadata from notebook cells.
+    """A preprocessor that extracts and processes style metadata from notebook cells.
 
     This preprocessor looks for style-related metadata in cells and prepares
-    them for use in HTML export.
+    them for use in HTML export. It processes cell-level styles (general, input-
+    specific, and output-specific) as well as notebook-level styles.
+
+    Attributes:
+        style_metadata_key (Unicode): The metadata key to look for cell styles.
+            Defaults to "style". Can be configured via traitlets config system.
+
+    Notes:
+        The preprocessor collects styles from four sources:
+        - Cell-level 'style' metadata: Applied to the entire cell container
+        - Cell-level 'input-style' metadata: Applied to the input area
+        - Cell-level 'output-style' metadata: Applied to the output area
+        - Notebook-level 'style' and 'stylesheet' metadata: Applied globally
+
+    Examples:
+        >>> from jupyter_export_html_style import StylePreprocessor
+        >>> preprocessor = StylePreprocessor()
+        >>> preprocessor.style_metadata_key = "custom_style"
+        >>> nb, resources = preprocessor.preprocess(notebook, {})
     """
 
     style_metadata_key = Unicode("style", help="The metadata key to look for cell styles").tag(
@@ -22,16 +39,14 @@ class StylePreprocessor(Preprocessor):
         """Preprocess the entire notebook.
 
         Args:
-            nb (NotebookNode):
-                The notebook to preprocess
-            resources (dict):
-                Additional resources used in the conversion process
+            nb (NotebookNode): The notebook to preprocess.
+            resources (dict): Additional resources used in the conversion process.
 
         Returns:
-            nb (NotebookNode):
-                The processed notebook
-            resources (dict):
-                Updated resources
+            (tuple): A tuple containing:
+                - nb (NotebookNode): The processed notebook.
+                - resources (dict): Updated resources with collected styles and
+                    notebook-level style information.
         """
         # Initialize style collection in resources
         if "styles" not in resources:
@@ -55,18 +70,18 @@ class StylePreprocessor(Preprocessor):
         """Preprocess a single cell.
 
         Args:
-            cell (NotebookNode):
-                The cell to preprocess
-            resources (dict):
-                Additional resources used in the conversion process
-            index (int):
-                The index of the cell in the notebook
+            cell (NotebookNode): The cell to preprocess.
+            resources (dict): Additional resources used in the conversion process.
+            index (int): The index of the cell in the notebook.
 
         Returns:
-            cell (NotebookNode):
-                The processed cell
-            resources (dict):
-                Updated resources
+            (tuple): A tuple containing:
+                - cell (NotebookNode): The processed cell with style metadata
+                    stored in cell_style, input_cell_style, and output_cell_style
+                    attributes.
+                - resources (dict): Updated resources with collected cell styles
+                    indexed by cell-{index}, cell-{index}-input, and
+                    cell-{index}-output keys.
         """
         cell_id = f"cell-{index}"
 
