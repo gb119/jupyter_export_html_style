@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "jupyter-export-html-style"
-version = "0.1.0"
+dynamic = ["version"]
 description = "A JupyterLab extension and nbconvert preprocessor/exporter for HTML export with cell style metadata overrides"
 authors = [
     {name = "Gavin Burnell", email = "gavin.burnell@example.com"}
@@ -64,6 +64,9 @@ styled_html = "jupyter_export_html_style.exporter:StyledHTMLExporter"
 
 [tool.setuptools]
 packages = ["jupyter_export_html_style"]
+
+[tool.setuptools.dynamic]
+version = {attr = "jupyter_export_html_style.__version__"}
 
 [tool.setuptools.package-data]
 jupyter_export_html_style = ["py.typed"]

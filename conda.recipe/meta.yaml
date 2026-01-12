@@ -1,5 +1,5 @@
 {% set name = "jupyter-export-html-style" %}
-{% set version = "0.1.0" %}
+{% set version = load_file_regex(load_file="jupyter_export_html_style/__init__.py", regex_pattern='__version__ = "(.+)"')[1] %}
 
 package:
   name: {{ name|lower }}

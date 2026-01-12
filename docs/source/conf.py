@@ -1,12 +1,18 @@
 # Configuration file for the Sphinx documentation builder.
 
+import os
+import sys
+sys.path.insert(0, os.path.abspath('../..'))
+
+from jupyter_export_html_style import __version__
+
 # -- Project information -----------------------------------------------------
 
 project = 'Jupyter Export HTML Style'
 copyright = '2026, Gavin Burnell'
 author = 'Gavin Burnell'
-release = '0.1.0'
-version = '0.1.0'
+release = __version__
+version = __version__
 
 # -- General configuration ---------------------------------------------------
 
