@@ -82,7 +82,7 @@ jobs:
         path: dist/*.tar.gz
     
     - name: Publish to PyPI
-      if: ${{ secrets.PYPI_TOKEN != '' && (github.event_name == 'release' || (github.event_name == 'workflow_dispatch' && inputs.publish_packages)) }}
+      if: ${{ github.event_name == 'release' || (github.event_name == 'workflow_dispatch' && inputs.publish_packages) }}
       env:
         TWINE_USERNAME: __token__
         TWINE_PASSWORD: ${{ secrets.PYPI_TOKEN }}
@@ -133,7 +133,7 @@ jobs:
     
     - name: Publish to Anaconda Cloud
       shell: bash -l {0}
-      if: ${{ env.PKG_PATH != '' && secrets.ANACONDA_TOKEN != '' && (github.event_name == 'release' || (github.event_name == 'workflow_dispatch' && inputs.publish_packages)) }}
+      if: ${{ env.PKG_PATH != '' && (github.event_name == 'release' || (github.event_name == 'workflow_dispatch' && inputs.publish_packages)) }}
       env:
         ANACONDA_API_TOKEN: ${{ secrets.ANACONDA_TOKEN }}
       run: |
