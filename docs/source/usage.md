@@ -126,7 +126,9 @@ When the JupyterLab extension is installed, you can:
 
 ## Examples
 
-### Example 1: Highlight Important Cells
+### Example 1: Cell-Level Styling
+
+Highlight important cells:
 
 ```json
 {
@@ -139,7 +141,60 @@ When the JupyterLab extension is installed, you can:
 }
 ```
 
-### Example 2: Error/Warning Styling
+### Example 2: Input and Output Styling
+
+Style the input and output areas of a cell separately:
+
+#### Input-Only Styling
+
+```json
+{
+  "input-style": {
+    "background-color": "#f5f5f5",
+    "border-left": "4px solid #2196f3",
+    "padding": "10px",
+    "font-family": "monospace"
+  }
+}
+```
+
+#### Output-Only Styling
+
+```json
+{
+  "output-style": {
+    "background-color": "#e8f5e9",
+    "border": "1px solid #4caf50",
+    "padding": "8px",
+    "font-family": "monospace",
+    "font-size": "14px"
+  }
+}
+```
+
+#### Combined Cell, Input, and Output Styles
+
+```json
+{
+  "style": {
+    "margin": "20px 0",
+    "border-radius": "8px",
+    "box-shadow": "0 2px 4px rgba(0,0,0,0.1)"
+  },
+  "input-style": {
+    "background-color": "#fce4ec",
+    "color": "#880e4f",
+    "padding": "12px"
+  },
+  "output-style": {
+    "background-color": "#e8f5e9",
+    "font-family": "monospace",
+    "padding": "12px"
+  }
+}
+```
+
+### Example 3: Error/Warning Styling
 
 ```json
 {
@@ -151,7 +206,7 @@ When the JupyterLab extension is installed, you can:
 }
 ```
 
-### Example 3: Success/Info Styling
+### Example 4: Success/Info Styling
 
 ```json
 {
@@ -161,6 +216,120 @@ When the JupyterLab extension is installed, you can:
     "padding": "10px"
   }
 }
+```
+
+### Example 5: Notebook-Level Styling
+
+Add custom styles and stylesheets to the entire notebook by adding metadata to the notebook (not individual cells):
+
+#### Via Notebook Interface
+
+1. Open the notebook metadata editor (Edit → Edit Notebook Metadata)
+2. Add the style metadata:
+
+```json
+{
+  "style": ".jp-Cell { box-shadow: 0 2px 4px rgba(0,0,0,0.1); }",
+  "stylesheet": "https://example.com/custom-theme.css"
+}
+```
+
+#### Programmatically
+
+```python
+import nbformat
+
+# Load notebook
+with open('notebook.ipynb', 'r') as f:
+    nb = nbformat.read(f, as_version=4)
+
+# Add notebook-level styles
+nb.metadata['style'] = """
+.jp-Cell {
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    margin-bottom: 20px;
+}
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+"""
+
+# Add external stylesheet(s)
+nb.metadata['stylesheet'] = [
+    'https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500&display=swap',
+    'https://example.com/custom-theme.css'
+]
+
+# Save notebook
+with open('notebook.ipynb', 'w') as f:
+    nbformat.write(nb, f)
+```
+
+### Example 6: Complete Styled Notebook
+
+A comprehensive example combining all style types:
+
+```python
+import nbformat
+from nbformat.v4 import new_code_cell, new_markdown_cell, new_notebook
+
+# Create cells with various styles
+cells = []
+
+# Title cell with styling
+title_cell = new_markdown_cell("# Styled Report")
+title_cell.metadata['style'] = {
+    'background-color': '#e3f2fd',
+    'padding': '20px',
+    'border-radius': '8px'
+}
+cells.append(title_cell)
+
+# Code cell with input styling
+code_cell = new_code_cell("import pandas as pd\ndata = pd.read_csv('data.csv')")
+code_cell.metadata['input-style'] = {
+    'background-color': '#f5f5f5',
+    'border-left': '4px solid #2196f3'
+}
+cells.append(code_cell)
+
+# Code cell with output styling
+result_cell = new_code_cell("print(data.describe())")
+result_cell.metadata['output-style'] = {
+    'background-color': '#e8f5e9',
+    'border': '1px solid #4caf50',
+    'font-family': 'monospace'
+}
+cells.append(result_cell)
+
+# Create notebook
+nb = new_notebook(cells=cells)
+
+# Add notebook-level styling
+nb.metadata['style'] = """
+body {
+    font-family: 'Segoe UI', sans-serif;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+.jp-Cell {
+    margin-bottom: 20px;
+}
+"""
+nb.metadata['stylesheet'] = 'https://fonts.googleapis.com/css2?family=Segoe+UI&display=swap'
+
+# Save and export
+with open('styled_notebook.ipynb', 'w') as f:
+    nbformat.write(nb, f)
+```
+
+Then export:
+
+```bash
+jupyter nbconvert --to styled_html styled_notebook.ipynb
 ```
 
 ## Troubleshooting

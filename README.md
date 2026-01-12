@@ -11,6 +11,8 @@ A JupyterLab extension and nbconvert preprocessor/exporter that allows custom ce
 ## Features
 
 - 🎨 **Custom Cell Styling**: Apply CSS styles to individual cells via metadata
+- 🎯 **Input/Output Styling**: Separate styles for cell inputs and outputs
+- 📝 **Notebook-Level Styling**: Add custom styles and stylesheets to the entire notebook
 - 🔧 **nbconvert Integration**: Seamlessly integrates with nbconvert's export pipeline
 - 🚀 **Easy to Use**: Simple metadata-based configuration
 - 📦 **Multiple Distribution Channels**: Available via pip and conda
@@ -75,7 +77,9 @@ exporter = StyledHTMLExporter()
 
 ## Usage Examples
 
-### Highlighting Important Cells
+### Cell-Level Styling
+
+#### Highlighting Important Cells
 
 ```json
 {
@@ -86,7 +90,7 @@ exporter = StyledHTMLExporter()
 }
 ```
 
-### Error/Warning Styling
+#### Error/Warning Styling
 
 ```json
 {
@@ -97,11 +101,106 @@ exporter = StyledHTMLExporter()
 }
 ```
 
-### Custom CSS Strings
+#### Custom CSS Strings
 
 ```json
 {
   "style": "background: linear-gradient(to right, #667eea 0%, #764ba2 100%); color: white; padding: 15px;"
+}
+```
+
+### Input and Output Styling
+
+Style the input and output areas of cells separately:
+
+#### Input Styling
+
+```json
+{
+  "input-style": {
+    "background-color": "#f5f5f5",
+    "border-left": "4px solid #2196f3",
+    "padding": "10px"
+  }
+}
+```
+
+#### Output Styling
+
+```json
+{
+  "output-style": {
+    "background-color": "#e8f5e9",
+    "border": "1px solid #4caf50",
+    "font-family": "monospace"
+  }
+}
+```
+
+#### Combined Cell, Input, and Output Styles
+
+```json
+{
+  "style": {
+    "margin": "20px 0",
+    "border-radius": "8px"
+  },
+  "input-style": {
+    "background-color": "#fce4ec",
+    "color": "#880e4f"
+  },
+  "output-style": {
+    "background-color": "#e8f5e9",
+    "font-family": "monospace"
+  }
+}
+```
+
+### Notebook-Level Styling
+
+Add custom styles and stylesheets that apply to the entire notebook. Add these to the notebook metadata (not cell metadata):
+
+#### Custom Inline Styles
+
+```json
+{
+  "metadata": {
+    "style": ".jp-Cell { box-shadow: 0 2px 4px rgba(0,0,0,0.1); } body { font-family: Arial, sans-serif; }"
+  }
+}
+```
+
+#### External Stylesheets
+
+Single stylesheet:
+```json
+{
+  "metadata": {
+    "stylesheet": "https://example.com/custom-theme.css"
+  }
+}
+```
+
+Multiple stylesheets:
+```json
+{
+  "metadata": {
+    "stylesheet": [
+      "https://fonts.googleapis.com/css2?family=Roboto&display=swap",
+      "https://example.com/custom-theme.css"
+    ]
+  }
+}
+```
+
+#### Combined Notebook Styles
+
+```json
+{
+  "metadata": {
+    "style": "body { max-width: 1200px; margin: 0 auto; }",
+    "stylesheet": ["https://fonts.googleapis.com/css2?family=Inter&display=swap"]
+  }
 }
 ```
 

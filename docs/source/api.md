@@ -28,6 +28,9 @@ The main module providing nbconvert integration for styled HTML export.
    
       Preprocess the entire notebook.
       
+      Extracts notebook-level style metadata (``style`` and ``stylesheet``) from the 
+      notebook metadata and stores them in resources for later use in HTML generation.
+      
       :param nb: The notebook to preprocess
       :type nb: NotebookNode
       :param resources: Additional resources used in the conversion process
@@ -38,6 +41,11 @@ The main module providing nbconvert integration for styled HTML export.
    .. method:: preprocess_cell(cell, resources, index)
    
       Preprocess a single cell.
+      
+      Extracts style metadata from cells including:
+      - ``style``: CSS styles for the entire cell container
+      - ``input-style``: CSS styles for the cell's input area
+      - ``output-style``: CSS styles for the cell's output area
       
       :param cell: The cell to preprocess
       :type cell: NotebookNode
@@ -54,11 +62,19 @@ The main module providing nbconvert integration for styled HTML export.
 ```{eval-rst}
 .. class:: StyledHTMLExporter
 
-   An HTML exporter that supports cell-level style customization.
+   An HTML exporter that supports cell-level and notebook-level style customization.
    
    This exporter extends the standard nbconvert HTMLExporter to include
-   custom styles defined in cell metadata. It automatically registers
+   custom styles defined in cell and notebook metadata. It automatically registers
    the StylePreprocessor and injects collected styles into the output HTML.
+   
+   **Supported Features:**
+   
+   - Cell-level styles via ``style`` metadata
+   - Input area styling via ``input-style`` metadata
+   - Output area styling via ``output-style`` metadata
+   - Notebook-level styles via notebook metadata ``style`` key
+   - External stylesheets via notebook metadata ``stylesheet`` key
 
    .. attribute:: template_name
       :type: str
@@ -70,6 +86,10 @@ The main module providing nbconvert integration for styled HTML export.
    
       Convert a notebook node to HTML with style support.
       
+      Processes the notebook with the StylePreprocessor and injects all collected
+      styles (cell-level and notebook-level) into the HTML output before the 
+      closing ``</head>`` tag.
+      
       :param nb: The notebook to convert
       :type nb: NotebookNode
       :param resources: Additional resources used in the conversion process
@@ -78,6 +98,30 @@ The main module providing nbconvert integration for styled HTML export.
       :type kw: dict
       :return: Tuple of HTML output and updated resources
       :rtype: tuple(str, dict)
+   
+   .. method:: _generate_style_block(styles)
+   
+      Generate a CSS style block from collected cell styles.
+      
+      Converts style dictionaries and strings into CSS rules that target specific
+      cell, input, and output elements by their IDs.
+      
+      :param styles: Dictionary mapping cell IDs to style definitions
+      :type styles: dict
+      :return: CSS style block as HTML string
+      :rtype: str
+
+   .. method:: _generate_notebook_style_block(notebook_styles)
+   
+      Generate style and stylesheet blocks from notebook-level metadata.
+      
+      Creates HTML link tags for external stylesheets and inline style tags for
+      custom CSS. Supports both single stylesheet strings and lists of stylesheets.
+      
+      :param notebook_styles: Dictionary containing 'style' and/or 'stylesheet' keys
+      :type notebook_styles: dict
+      :return: HTML containing style and/or link elements
+      :rtype: str
 ```
 
 ## Module-Level Attributes
@@ -125,6 +169,74 @@ exporter.template_name = "classic"
 # Save to file
 with open('output.html', 'w') as f:
     f.write(body)
+```
+
+### Creating Notebooks with Input/Output Styles
+
+```python
+from jupyter_export_html_style import StyledHTMLExporter
+from nbformat.v4 import new_code_cell, new_notebook
+import nbformat
+
+# Create cells with input and output styles
+cells = []
+
+cell1 = new_code_cell("x = 42\nprint(x)")
+cell1.metadata['input-style'] = {
+    'background-color': '#f5f5f5',
+    'border-left': '4px solid #2196f3'
+}
+cell1.metadata['output-style'] = {
+    'background-color': '#e8f5e9',
+    'font-family': 'monospace'
+}
+cells.append(cell1)
+
+# Create notebook
+nb = new_notebook(cells=cells)
+
+# Add notebook-level styles
+nb.metadata['style'] = """
+body {
+    font-family: 'Segoe UI', sans-serif;
+    max-width: 1200px;
+}
+"""
+nb.metadata['stylesheet'] = 'https://fonts.googleapis.com/css2?family=Segoe+UI'
+
+# Export
+exporter = StyledHTMLExporter()
+output, resources = exporter.from_notebook_node(nb)
+
+# Save
+with open('styled_output.html', 'w') as f:
+    f.write(output)
+```
+
+### Processing Cell-Level Styles
+
+```python
+from jupyter_export_html_style import StylePreprocessor
+import nbformat
+from nbformat.v4 import new_code_cell, new_notebook
+
+# Create a notebook with various style types
+cell1 = new_code_cell("# Cell with all style types")
+cell1.metadata['style'] = {'margin': '20px'}
+cell1.metadata['input-style'] = {'color': 'blue'}
+cell1.metadata['output-style'] = {'border': '1px solid green'}
+
+nb = new_notebook(cells=[cell1])
+
+# Process with preprocessor
+preprocessor = StylePreprocessor()
+processed_nb, resources = preprocessor.preprocess(nb, {})
+
+# Check collected styles
+print(f"Collected styles: {resources['styles']}")
+# Output: {'cell-0': {'margin': '20px'}, 
+#          'cell-0-input': {'color': 'blue'},
+#          'cell-0-output': {'border': '1px solid green'}}
 ```
 
 ### Configuration via Traitlets

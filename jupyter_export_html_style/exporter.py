@@ -59,9 +59,7 @@ class StyledHTMLExporter(HTMLExporter):
 
         # Add notebook-level styles and stylesheets
         if resources and "notebook_styles" in resources:
-            notebook_style_block = self._generate_notebook_style_block(
-                resources["notebook_styles"]
-            )
+            notebook_style_block = self._generate_notebook_style_block(resources["notebook_styles"])
             if notebook_style_block:
                 style_blocks.append(notebook_style_block)
 
