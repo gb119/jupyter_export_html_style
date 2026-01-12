@@ -69,7 +69,7 @@ packages = ["jupyter_export_html_style"]
 version = {attr = "jupyter_export_html_style.__version__"}
 
 [tool.setuptools.package-data]
-jupyter_export_html_style = ["py.typed"]
+jupyter_export_html_style = ["py.typed", "templates/**/*.j2", "templates/**/*.json"]
 
 [tool.black]
 line-length = 100
