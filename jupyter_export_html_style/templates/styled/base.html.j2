@@ -1,0 +1,57 @@
+{%- extends 'lab/base.html.j2' -%}
+
+{#
+  Override cell rendering to add custom IDs for CSS targeting.
+  This allows the generated CSS rules (#cell-0, #cell-0-input, #cell-0-output)
+  to properly target the HTML elements.
+#}
+
+{% block codecell %}
+{%- if not cell.outputs -%}
+{%- set no_output_class="jp-mod-noOutputs" -%}
+{%- endif -%}
+{%- if not resources.global_content_filter.include_input -%}
+{%- set no_input_class="jp-mod-noInput" -%}
+{%- endif -%}
+<div {{ cell_id_anchor(cell) }} id="cell-{{ loop.index0 }}" class="jp-Cell jp-CodeCell jp-Notebook-cell {{ no_output_class }} {{ no_input_class }} {{ celltags(cell) }}">
+{{ super() }}
+</div>
+{%- endblock codecell %}
+
+{% block input_group -%}
+<div class="jp-Cell-inputWrapper" id="cell-{{ loop.index0 }}-input">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+{{ super() }}
+</div>
+</div>
+{% endblock input_group %}
+
+{% block output_group %}
+<div class="jp-Cell-outputWrapper" id="cell-{{ loop.index0 }}-output">
+<div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
+</div>
+{{ super() }}
+</div>
+{% endblock output_group %}
+
+{% block markdowncell scoped %}
+<div {{ cell_id_anchor(cell) }} id="cell-{{ loop.index0 }}" class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+<div class="jp-Cell-inputWrapper">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput {{ celltags(cell) }}" data-mime-type="text/markdown">
+{{ cell.source  | markdown2html | strip_files_prefix }}
+</div>
+</div>
+</div>
+</div>
+{%- endblock markdowncell %}
+
+{% block rawcell scoped %}
+<div {{ cell_id_anchor(cell) }} id="cell-{{ loop.index0 }}" class="jp-Cell jp-RawCell jp-Notebook-cell">
+{{ cell.source | wrap_text(80) }}
+</div>
+{%- endblock rawcell %}

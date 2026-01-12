@@ -116,7 +116,7 @@ def _create_notebook_with_image(tmpdir, image_filename="test.png"):
 def test_styled_html_exporter_initialization():
     """Test that StyledHTMLExporter can be initialized."""
     exporter = StyledHTMLExporter()
-    assert exporter.template_name == "classic"
+    assert exporter.template_name == "styled"
 
 
 def test_export_notebook_without_styles():
@@ -498,3 +498,47 @@ def test_embed_images_disabled_keeps_file_reference():
 
         # Verify file reference is present
         assert 'src="test.png"' in output, "File reference to test.png not found in output"
+
+
+def test_css_selectors_match_html_elements():
+    """Test that CSS selectors match actual HTML element IDs.
+
+    This test verifies the fix for the issue where CSS rules were generated
+    but didn't match any elements in the HTML output.
+    """
+    exporter = StyledHTMLExporter()
+
+    # Create notebook with various style types
+    cell1 = new_code_cell("x = 1")
+    cell1.metadata["style"] = {"background-color": "#f0f0f0"}
+
+    cell2 = new_code_cell("y = 2")
+    cell2.metadata["input-style"] = {"color": "red"}
+
+    cell3 = new_code_cell("z = 3")
+    cell3.metadata["output-style"] = {"border": "1px solid blue"}
+
+    nb = new_notebook(cells=[cell1, cell2, cell3])
+
+    output, resources = exporter.from_notebook_node(nb)
+
+    # Parse HTML
+    soup = _parse_html(output)
+    css_rules = _extract_css_rules(output)
+
+    # Verify CSS rules exist
+    assert "#cell-0" in css_rules, "CSS rule for #cell-0 not found"
+    assert "#cell-1-input" in css_rules, "CSS rule for #cell-1-input not found"
+    assert "#cell-2-output" in css_rules, "CSS rule for #cell-2-output not found"
+
+    # Verify matching HTML elements exist
+    assert soup.find(id="cell-0") is not None, "HTML element with id='cell-0' not found"
+    assert soup.find(id="cell-1") is not None, "HTML element with id='cell-1' not found"
+    assert soup.find(id="cell-1-input") is not None, "HTML element with id='cell-1-input' not found"
+    assert soup.find(id="cell-2") is not None, "HTML element with id='cell-2' not found"
+    # Note: cell-2-output element won't exist without actual output
+
+    # Verify the styles are applied with correct values
+    assert css_rules["#cell-0"]["background-color"] == "#f0f0f0"
+    assert css_rules["#cell-1-input"]["color"] == "red"
+    assert css_rules["#cell-2-output"]["border"] == "1px solid blue"

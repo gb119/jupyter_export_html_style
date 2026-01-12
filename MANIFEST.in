@@ -2,6 +2,7 @@ include README.md
 include LICENSE
 include pyproject.toml
 recursive-include jupyter_export_html_style *.py
+recursive-include jupyter_export_html_style/templates *.j2 *.json
 recursive-include docs *.md *.py *.rst *.bat Makefile
 include conda.recipe/meta.yaml
 global-exclude __pycache__

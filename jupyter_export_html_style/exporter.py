@@ -2,6 +2,8 @@
 Custom HTML exporter with style support.
 """
 
+import os
+
 from nbconvert.exporters import HTMLExporter
 from traitlets import Unicode
 
@@ -23,7 +25,7 @@ class StyledHTMLExporter(HTMLExporter):
     Attributes:
         export_from_notebook (str): Label for the export option.
         template_name (Unicode): Name of the template to use. Defaults to
-            "classic". Can be configured via traitlets config system.
+            "styled". Can be configured via traitlets config system.
 
     Notes:
         The exporter supports multiple types of styles:
@@ -53,7 +55,7 @@ class StyledHTMLExporter(HTMLExporter):
     export_from_notebook = "Styled HTML Export"
 
     # Custom template file (can be overridden)
-    template_name = Unicode("classic", help="Name of the template to use").tag(config=True)
+    template_name = Unicode("styled", help="Name of the template to use").tag(config=True)
 
     def __init__(self, **kw):
         """Initialize the exporter and register the style preprocessor.
@@ -66,6 +68,14 @@ class StyledHTMLExporter(HTMLExporter):
         # Note: **kw creates a new dict, so this doesn't modify caller's data
         if "embed_images" not in kw:
             kw["embed_images"] = True
+
+        # Add custom template directory to the search path before initialization
+        template_path = os.path.join(os.path.dirname(__file__), "templates")
+        if "extra_template_basedirs" in kw:
+            if template_path not in kw["extra_template_basedirs"]:
+                kw["extra_template_basedirs"].insert(0, template_path)
+        else:
+            kw["extra_template_basedirs"] = [template_path]
 
         super().__init__(**kw)
 
