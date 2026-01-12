@@ -18,7 +18,7 @@ class StylePreprocessor(Preprocessor):
             Defaults to "style". Can be configured via traitlets config system.
 
     Notes:
-        The preprocessor collects styles from three sources:
+        The preprocessor collects styles from four sources:
         - Cell-level 'style' metadata: Applied to the entire cell container
         - Cell-level 'input-style' metadata: Applied to the input area
         - Cell-level 'output-style' metadata: Applied to the output area
