@@ -225,3 +225,93 @@ def test_generate_notebook_style_block_empty():
     style_block = exporter._generate_notebook_style_block(notebook_styles)
 
     assert style_block == ""
+
+
+def test_embed_images_enabled_by_default():
+    """Test that embed_images is enabled by default."""
+    exporter = StyledHTMLExporter()
+
+    assert exporter.embed_images is True
+
+
+def test_embed_images_can_be_disabled():
+    """Test that embed_images can be explicitly disabled."""
+    exporter = StyledHTMLExporter(embed_images=False)
+
+    assert exporter.embed_images is False
+
+
+def test_embed_images_with_markdown_image():
+    """Test that markdown images are embedded when embed_images is True."""
+    import os
+    import tempfile
+
+    import nbformat as nbf
+
+    # Create a real image file (1x1 red pixel PNG)
+    img_data = bytes.fromhex(
+        "89504e470d0a1a0a0000000d49484452000000010000000108060000001f15c489"
+        "0000000d49444154789c63f8cfc03f00050201055fc8f1d20000000049454e44ae426082"
+    )
+
+    with tempfile.TemporaryDirectory() as tmpdir:
+        # Create image file
+        img_path = os.path.join(tmpdir, "test.png")
+        with open(img_path, "wb") as f:
+            f.write(img_data)
+
+        # Create notebook with markdown cell referencing the image
+        nb = nbf.v4.new_notebook()
+        md_cell = nbf.v4.new_markdown_cell("![Test Image](test.png)")
+        nb.cells.append(md_cell)
+
+        # Write notebook to file
+        nb_path = os.path.join(tmpdir, "test.ipynb")
+        with open(nb_path, "w") as f:
+            nbf.write(nb, f)
+
+        # Export with default settings (embed_images=True)
+        exporter = StyledHTMLExporter()
+        output, resources = exporter.from_filename(nb_path)
+
+        # Verify image is embedded as data URI
+        assert "data:image/png;base64," in output
+        # Verify file reference is NOT present (replaced with data URI)
+        assert 'src="test.png"' not in output
+
+
+def test_embed_images_disabled_keeps_file_reference():
+    """Test that markdown images remain as file references when embed_images is False."""
+    import os
+    import tempfile
+
+    import nbformat as nbf
+
+    # Create a real image file (1x1 red pixel PNG)
+    img_data = bytes.fromhex(
+        "89504e470d0a1a0a0000000d49484452000000010000000108060000001f15c489"
+        "0000000d49444154789c63f8cfc03f00050201055fc8f1d20000000049454e44ae426082"
+    )
+
+    with tempfile.TemporaryDirectory() as tmpdir:
+        # Create image file
+        img_path = os.path.join(tmpdir, "test.png")
+        with open(img_path, "wb") as f:
+            f.write(img_data)
+
+        # Create notebook with markdown cell referencing the image
+        nb = nbf.v4.new_notebook()
+        md_cell = nbf.v4.new_markdown_cell("![Test Image](test.png)")
+        nb.cells.append(md_cell)
+
+        # Write notebook to file
+        nb_path = os.path.join(tmpdir, "test.ipynb")
+        with open(nb_path, "w") as f:
+            nbf.write(nb, f)
+
+        # Export with embed_images=False
+        exporter = StyledHTMLExporter(embed_images=False)
+        output, resources = exporter.from_filename(nb_path)
+
+        # Verify file reference is present
+        assert 'src="test.png"' in output
