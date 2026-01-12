@@ -3,9 +3,11 @@ Tests for the StyledHTMLExporter class.
 """
 
 import os
+import re
 import tempfile
 
 import nbformat as nbf
+from bs4 import BeautifulSoup
 from nbformat.v4 import new_code_cell, new_markdown_cell, new_notebook
 
 from jupyter_export_html_style import StyledHTMLExporter
@@ -16,6 +18,55 @@ TEST_IMAGE_PNG = bytes.fromhex(
     "89504e470d0a1a0a0000000d49484452000000010000000108060000001f15c489"
     "0000000d49444154789c63f8cfc03f00050201055fc8f1d20000000049454e44ae426082"
 )
+
+
+def _parse_html(html_string):
+    """Parse HTML string and return BeautifulSoup object.
+
+    Args:
+        html_string (str): HTML content to parse.
+
+    Returns:
+        (BeautifulSoup): Parsed HTML document.
+    """
+    return BeautifulSoup(html_string, "html.parser")
+
+
+def _extract_css_rules(html_string):
+    """Extract CSS rules from HTML style blocks.
+
+    Args:
+        html_string (str): HTML content containing style blocks.
+
+    Returns:
+        (dict): Dictionary mapping CSS selectors to their style properties.
+            For example: {"#cell-0": {"background-color": "#f0f0f0"}}
+    """
+    soup = _parse_html(html_string)
+    css_rules = {}
+
+    # Find all style tags
+    for style_tag in soup.find_all("style"):
+        style_content = style_tag.string
+        if style_content:
+            # Parse CSS rules using regex
+            # Matches patterns like: #cell-0 { background-color: #fff; padding: 10px }
+            rule_pattern = r"([#.\w-]+)\s*\{([^}]+)\}"
+            for match in re.finditer(rule_pattern, style_content):
+                selector = match.group(1).strip()
+                properties_str = match.group(2).strip()
+
+                # Parse individual properties
+                properties = {}
+                for prop in properties_str.split(";"):
+                    prop = prop.strip()
+                    if ":" in prop:
+                        key, value = prop.split(":", 1)
+                        properties[key.strip()] = value.strip()
+
+                css_rules[selector] = properties
+
+    return css_rules
 
 
 def _create_notebook_with_image(tmpdir, image_filename="test.png"):
@@ -78,8 +129,27 @@ def test_export_notebook_with_styles():
 
     assert output is not None
     assert isinstance(output, str)
-    # Check that custom styles are included
-    assert "/* Custom cell styles */" in output or "<style>" in output
+
+    # Parse HTML and extract CSS rules
+    soup = _parse_html(output)
+    css_rules = _extract_css_rules(output)
+
+    # Verify that custom style block exists
+    style_tags = soup.find_all("style")
+    assert len(style_tags) > 0, "No style tags found in HTML"
+
+    # Check for the custom cell styles comment
+    has_custom_comment = False
+    for style_tag in style_tags:
+        if style_tag.string and "Custom cell styles" in style_tag.string:
+            has_custom_comment = True
+            break
+    assert has_custom_comment, "Custom cell styles comment not found"
+
+    # Verify the specific CSS rule exists with correct property
+    assert "#cell-0" in css_rules, "CSS rule for #cell-0 not found"
+    assert "background-color" in css_rules["#cell-0"], "background-color property not found"
+    assert css_rules["#cell-0"]["background-color"] == "#f0f0f0"
 
 
 def test_generate_style_block_with_dict():
@@ -90,12 +160,26 @@ def test_generate_style_block_with_dict():
 
     style_block = exporter._generate_style_block(styles)
 
+    # Parse the generated style block
+    css_rules = _extract_css_rules(style_block)
+
+    # Verify structure
     assert "<style>" in style_block
     assert "</style>" in style_block
-    assert "#cell-0" in style_block
-    assert "#cell-1" in style_block
-    assert "background-color: #fff" in style_block
-    assert "color: red" in style_block
+
+    # Verify specific CSS rules
+    assert "#cell-0" in css_rules
+    assert "#cell-1" in css_rules
+
+    # Check properties for cell-0
+    assert "background-color" in css_rules["#cell-0"]
+    assert css_rules["#cell-0"]["background-color"] == "#fff"
+    assert "padding" in css_rules["#cell-0"]
+    assert css_rules["#cell-0"]["padding"] == "10px"
+
+    # Check properties for cell-1
+    assert "color" in css_rules["#cell-1"]
+    assert css_rules["#cell-1"]["color"] == "red"
 
 
 def test_generate_style_block_with_string():
@@ -106,9 +190,18 @@ def test_generate_style_block_with_string():
 
     style_block = exporter._generate_style_block(styles)
 
+    # Parse the generated style block
+    css_rules = _extract_css_rules(style_block)
+
+    # Verify structure
     assert "<style>" in style_block
-    assert "#cell-0" in style_block
-    assert "background-color: #eee; padding: 5px;" in style_block
+
+    # Verify specific CSS rule and properties
+    assert "#cell-0" in css_rules
+    assert "background-color" in css_rules["#cell-0"]
+    assert css_rules["#cell-0"]["background-color"] == "#eee"
+    assert "padding" in css_rules["#cell-0"]
+    assert css_rules["#cell-0"]["padding"] == "5px"
 
 
 def test_generate_style_block_empty():
@@ -150,9 +243,14 @@ def test_export_notebook_with_input_style():
 
     output, resources = exporter.from_notebook_node(nb)
 
+    # Parse and extract CSS rules
+    css_rules = _extract_css_rules(output)
+
+    # Verify the CSS rule for input styling
     assert output is not None
-    assert "#cell-0-input" in output
-    assert "background-color: #ffe" in output
+    assert "#cell-0-input" in css_rules, "CSS rule for #cell-0-input not found"
+    assert "background-color" in css_rules["#cell-0-input"]
+    assert css_rules["#cell-0-input"]["background-color"] == "#ffe"
 
 
 def test_export_notebook_with_output_style():
@@ -166,9 +264,14 @@ def test_export_notebook_with_output_style():
 
     output, resources = exporter.from_notebook_node(nb)
 
+    # Parse and extract CSS rules
+    css_rules = _extract_css_rules(output)
+
+    # Verify the CSS rule for output styling
     assert output is not None
-    assert "#cell-0-output" in output
-    assert "border: 2px solid blue" in output
+    assert "#cell-0-output" in css_rules, "CSS rule for #cell-0-output not found"
+    assert "border" in css_rules["#cell-0-output"]
+    assert css_rules["#cell-0-output"]["border"] == "2px solid blue"
 
 
 def test_export_notebook_with_all_cell_styles():
@@ -184,10 +287,19 @@ def test_export_notebook_with_all_cell_styles():
 
     output, resources = exporter.from_notebook_node(nb)
 
+    # Parse and extract CSS rules
+    css_rules = _extract_css_rules(output)
+
+    # Verify all CSS rules are present
     assert output is not None
-    assert "#cell-0" in output
-    assert "#cell-0-input" in output
-    assert "#cell-0-output" in output
+    assert "#cell-0" in css_rules, "CSS rule for #cell-0 not found"
+    assert "#cell-0-input" in css_rules, "CSS rule for #cell-0-input not found"
+    assert "#cell-0-output" in css_rules, "CSS rule for #cell-0-output not found"
+
+    # Verify specific properties
+    assert css_rules["#cell-0"]["padding"] == "10px"
+    assert css_rules["#cell-0-input"]["color"] == "red"
+    assert css_rules["#cell-0-output"]["font-weight"] == "bold"
 
 
 def test_export_notebook_with_notebook_level_style():
@@ -199,9 +311,22 @@ def test_export_notebook_with_notebook_level_style():
 
     output, resources = exporter.from_notebook_node(nb)
 
+    # Parse HTML
+    soup = _parse_html(output)
+
+    # Verify notebook-level styles are present
     assert output is not None
-    assert "/* Custom notebook styles */" in output
-    assert ".custom-class { color: green; }" in output
+
+    # Check for the custom notebook styles comment
+    has_custom_comment = False
+    for style_tag in soup.find_all("style"):
+        if style_tag.string and "Custom notebook styles" in style_tag.string:
+            has_custom_comment = True
+            # Also verify the actual style content
+            assert ".custom-class { color: green; }" in style_tag.string
+            break
+
+    assert has_custom_comment, "Custom notebook styles comment not found"
 
 
 def test_export_notebook_with_stylesheet():
@@ -213,8 +338,16 @@ def test_export_notebook_with_stylesheet():
 
     output, resources = exporter.from_notebook_node(nb)
 
+    # Parse HTML and find link tags
+    soup = _parse_html(output)
+
     assert output is not None
-    assert '<link rel="stylesheet" href="https://example.com/style.css">' in output
+
+    # Find the stylesheet link
+    link_tags = soup.find_all("link", rel="stylesheet")
+    stylesheet_urls = [link.get("href") for link in link_tags]
+
+    assert "https://example.com/style.css" in stylesheet_urls, "Stylesheet link not found in HTML"
 
 
 def test_export_notebook_with_multiple_stylesheets():
@@ -229,9 +362,17 @@ def test_export_notebook_with_multiple_stylesheets():
 
     output, resources = exporter.from_notebook_node(nb)
 
+    # Parse HTML and find link tags
+    soup = _parse_html(output)
+
     assert output is not None
-    assert '<link rel="stylesheet" href="https://example.com/style1.css">' in output
-    assert '<link rel="stylesheet" href="https://example.com/style2.css">' in output
+
+    # Find all stylesheet links
+    link_tags = soup.find_all("link", rel="stylesheet")
+    stylesheet_urls = [link.get("href") for link in link_tags]
+
+    assert "https://example.com/style1.css" in stylesheet_urls, "First stylesheet link not found"
+    assert "https://example.com/style2.css" in stylesheet_urls, "Second stylesheet link not found"
 
 
 def test_generate_notebook_style_block_with_style():
@@ -241,9 +382,23 @@ def test_generate_notebook_style_block_with_style():
     notebook_styles = {"style": "body { background: white; }"}
     style_block = exporter._generate_notebook_style_block(notebook_styles)
 
+    # Parse the generated style block
+    soup = _parse_html(style_block)
+
     assert "<style>" in style_block
-    assert "/* Custom notebook styles */" in style_block
-    assert "body { background: white; }" in style_block
+
+    # Check for the custom notebook styles comment
+    style_tags = soup.find_all("style")
+    assert len(style_tags) > 0
+
+    has_custom_comment = False
+    for style_tag in style_tags:
+        if style_tag.string and "Custom notebook styles" in style_tag.string:
+            has_custom_comment = True
+            assert "body { background: white; }" in style_tag.string
+            break
+
+    assert has_custom_comment, "Custom notebook styles comment not found"
 
 
 def test_generate_notebook_style_block_with_stylesheet():
@@ -253,7 +408,12 @@ def test_generate_notebook_style_block_with_stylesheet():
     notebook_styles = {"stylesheet": "https://cdn.example.com/theme.css"}
     style_block = exporter._generate_notebook_style_block(notebook_styles)
 
-    assert '<link rel="stylesheet" href="https://cdn.example.com/theme.css">' in style_block
+    # Parse and find link tags
+    soup = _parse_html(style_block)
+    link_tags = soup.find_all("link", rel="stylesheet")
+
+    assert len(link_tags) > 0, "No stylesheet link found"
+    assert link_tags[0].get("href") == "https://cdn.example.com/theme.css"
 
 
 def test_generate_notebook_style_block_empty():
@@ -290,8 +450,22 @@ def test_embed_images_with_markdown_image():
         exporter = StyledHTMLExporter()
         output, resources = exporter.from_filename(nb_path)
 
+        # Parse HTML and find img tags
+        soup = _parse_html(output)
+        img_tags = soup.find_all("img")
+
         # Verify image is embedded as data URI
         assert "data:image/png;base64," in output
+        # Verify that at least one img tag has a data URI
+        has_data_uri = False
+        for img in img_tags:
+            src = img.get("src", "")
+            if src.startswith("data:image/png;base64,"):
+                has_data_uri = True
+                break
+
+        assert has_data_uri, "No img tag with data URI found"
+
         # Verify file reference is NOT present (replaced with data URI)
         assert 'src="test.png"' not in output
 
@@ -307,4 +481,4 @@ def test_embed_images_disabled_keeps_file_reference():
         output, resources = exporter.from_filename(nb_path)
 
         # Verify file reference is present
-        assert 'src="test.png"' in output
+        assert 'src="test.png"' in output, "File reference to test.png not found in output"
