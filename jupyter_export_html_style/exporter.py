@@ -63,6 +63,7 @@ class StyledHTMLExporter(HTMLExporter):
                 HTMLExporter class.
         """
         # Enable image embedding by default unless explicitly set
+        # Note: **kw creates a new dict, so this doesn't modify caller's data
         if "embed_images" not in kw:
             kw["embed_images"] = True
 

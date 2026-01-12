@@ -10,7 +10,8 @@ from nbformat.v4 import new_code_cell, new_markdown_cell, new_notebook
 
 from jupyter_export_html_style import StyledHTMLExporter
 
-# Test image data: 1x1 red pixel PNG
+# Test image data: 1x1 red pixel PNG (89 50 4E 47 = PNG signature)
+# This is a minimal valid PNG file for testing purposes
 TEST_IMAGE_PNG = bytes.fromhex(
     "89504e470d0a1a0a0000000d49484452000000010000000108060000001f15c489"
     "0000000d49444154789c63f8cfc03f00050201055fc8f1d20000000049454e44ae426082"
