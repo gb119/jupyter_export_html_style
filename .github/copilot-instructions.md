@@ -12,3 +12,8 @@ All docstrings for python functions, classes, methods should confirm to the foll
 - Public methods and functions should have examples of usage in an "Examples:" section
 - The Class constructor should be documented in the class docstring rather than the __init__ method's docstring.
 
+# Issues and Bugs discovered during copilot operations
+
+If a new issue or bug is discovered during editing or creating other features, place a descritpion of the issue in BUGS.md. Describe the ussye/bug in a way that will make it most easy for a future copilot session to correct the problem.
+
+If an issue or bug in BUGS.md is fixed, remove the issue report from the BUGS.md file.
