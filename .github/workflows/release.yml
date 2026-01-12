@@ -4,7 +4,7 @@
 #
 # Required secrets for publishing:
 #   ANACONDA_TOKEN: Anaconda Cloud API token for uploading conda packages
-#                   (used with: anaconda upload --token $ANACONDA_TOKEN <package>)
+#                   (set as ANACONDA_API_TOKEN environment variable for anaconda-client)
 #   PYPI_TOKEN: PyPI API token for uploading Python packages
 #               (used with: python -m twine upload --username __token__ --password $PYPI_TOKEN dist/*)
 #
@@ -57,6 +57,14 @@ jobs:
       with:
         name: python-sdist
         path: dist/*.tar.gz
+    
+    - name: Publish to PyPI
+      env:
+        TWINE_USERNAME: __token__
+        TWINE_PASSWORD: ${{ secrets.PYPI_TOKEN }}
+      run: |
+        # --skip-existing prevents failures if version already uploaded (e.g., during manual re-runs)
+        twine upload --skip-existing dist/*
 
   build-conda:
     name: Build Conda Package
@@ -97,3 +105,12 @@ jobs:
       with:
         name: conda-package
         path: ${{ env.PKG_PATH }}
+    
+    - name: Publish to Anaconda Cloud
+      shell: bash -l {0}
+      if: env.PKG_PATH != ''
+      env:
+        ANACONDA_API_TOKEN: ${{ secrets.ANACONDA_TOKEN }}
+      run: |
+        # --force allows overwriting existing packages (e.g., during manual re-runs)
+        anaconda upload --force $PKG_PATH
