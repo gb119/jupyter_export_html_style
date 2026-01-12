@@ -2,9 +2,48 @@
 Tests for the StyledHTMLExporter class.
 """
 
+import os
+import tempfile
+
+import nbformat as nbf
 from nbformat.v4 import new_code_cell, new_markdown_cell, new_notebook
 
 from jupyter_export_html_style import StyledHTMLExporter
+
+# Test image data: 1x1 red pixel PNG (89 50 4E 47 = PNG signature)
+# This is a minimal valid PNG file for testing purposes
+TEST_IMAGE_PNG = bytes.fromhex(
+    "89504e470d0a1a0a0000000d49484452000000010000000108060000001f15c489"
+    "0000000d49444154789c63f8cfc03f00050201055fc8f1d20000000049454e44ae426082"
+)
+
+
+def _create_notebook_with_image(tmpdir, image_filename="test.png"):
+    """Helper function to create a test notebook with an image reference.
+
+    Args:
+        tmpdir (str): Temporary directory path.
+        image_filename (str): Name of the image file. Defaults to "test.png".
+
+    Returns:
+        (str): Path to the created notebook file.
+    """
+    # Create image file
+    img_path = os.path.join(tmpdir, image_filename)
+    with open(img_path, "wb") as f:
+        f.write(TEST_IMAGE_PNG)
+
+    # Create notebook with markdown cell referencing the image
+    nb = new_notebook()
+    md_cell = new_markdown_cell(f"![Test Image]({image_filename})")
+    nb.cells.append(md_cell)
+
+    # Write notebook to file
+    nb_path = os.path.join(tmpdir, "test.ipynb")
+    with open(nb_path, "w") as f:
+        nbf.write(nb, f)
+
+    return nb_path
 
 
 def test_styled_html_exporter_initialization():
@@ -225,3 +264,47 @@ def test_generate_notebook_style_block_empty():
     style_block = exporter._generate_notebook_style_block(notebook_styles)
 
     assert style_block == ""
+
+
+def test_embed_images_enabled_by_default():
+    """Test that embed_images is enabled by default."""
+    exporter = StyledHTMLExporter()
+
+    assert exporter.embed_images is True
+
+
+def test_embed_images_can_be_disabled():
+    """Test that embed_images can be explicitly disabled."""
+    exporter = StyledHTMLExporter(embed_images=False)
+
+    assert exporter.embed_images is False
+
+
+def test_embed_images_with_markdown_image():
+    """Test that markdown images are embedded when embed_images is True."""
+    with tempfile.TemporaryDirectory() as tmpdir:
+        # Create test notebook with image
+        nb_path = _create_notebook_with_image(tmpdir)
+
+        # Export with default settings (embed_images=True)
+        exporter = StyledHTMLExporter()
+        output, resources = exporter.from_filename(nb_path)
+
+        # Verify image is embedded as data URI
+        assert "data:image/png;base64," in output
+        # Verify file reference is NOT present (replaced with data URI)
+        assert 'src="test.png"' not in output
+
+
+def test_embed_images_disabled_keeps_file_reference():
+    """Test that markdown images remain as file references when embed_images is False."""
+    with tempfile.TemporaryDirectory() as tmpdir:
+        # Create test notebook with image
+        nb_path = _create_notebook_with_image(tmpdir)
+
+        # Export with embed_images=False
+        exporter = StyledHTMLExporter(embed_images=False)
+        output, resources = exporter.from_filename(nb_path)
+
+        # Verify file reference is present
+        assert 'src="test.png"' in output

@@ -16,6 +16,10 @@ class StyledHTMLExporter(HTMLExporter):
     to handle style metadata extraction and generates appropriate CSS to apply
     the styles during HTML export.
 
+    By default, this exporter embeds images as base64 data URIs in the HTML
+    output, making the HTML file self-contained. This behavior can be disabled
+    by passing `embed_images=False` to the constructor.
+
     Attributes:
         export_from_notebook (str): Label for the export option.
         template_name (Unicode): Name of the template to use. Defaults to
@@ -33,10 +37,17 @@ class StyledHTMLExporter(HTMLExporter):
         - A dictionary of CSS property-value pairs
         - A string containing CSS declarations
 
+        Images in markdown cells are embedded as base64 data URIs by default,
+        making the exported HTML self-contained without requiring external
+        image files.
+
     Examples:
         >>> from jupyter_export_html_style import StyledHTMLExporter
         >>> exporter = StyledHTMLExporter()
         >>> output, resources = exporter.from_notebook_node(notebook)
+
+        >>> # Disable image embedding if needed
+        >>> exporter = StyledHTMLExporter(embed_images=False)
     """
 
     export_from_notebook = "Styled HTML Export"
@@ -51,6 +62,11 @@ class StyledHTMLExporter(HTMLExporter):
             **kw (dict): Additional keyword arguments passed to the parent
                 HTMLExporter class.
         """
+        # Enable image embedding by default unless explicitly set
+        # Note: **kw creates a new dict, so this doesn't modify caller's data
+        if "embed_images" not in kw:
+            kw["embed_images"] = True
+
         super().__init__(**kw)
 
         # Register the style preprocessor
