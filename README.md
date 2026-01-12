@@ -1,6 +1,7 @@
 # Jupyter Export HTML Style
 
 [![Build Status](https://github.com/gb119/jupyter_export_html_style/workflows/Build%20and%20Test/badge.svg)](https://github.com/gb119/jupyter_export_html_style/actions)
+[![Documentation](https://img.shields.io/badge/docs-GitHub%20Pages-blue)](https://gb119.github.io/jupyter_export_html_style/)
 [![PyPI version](https://badge.fury.io/py/jupyter-export-html-style.svg)](https://pypi.org/project/jupyter-export-html-style/)
 [![Conda Version](https://img.shields.io/conda/vn/phygbu/jupyter-export-html-style.svg)](https://anaconda.org/phygbu/jupyter-export-html-style)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
@@ -126,7 +127,7 @@ The conda package will be built in your conda-bld directory.
 
 ## Documentation
 
-Full documentation is available at [https://jupyter-export-html-style.readthedocs.io](https://jupyter-export-html-style.readthedocs.io)
+Full documentation is available at [https://gb119.github.io/jupyter_export_html_style/](https://gb119.github.io/jupyter_export_html_style/)
 
 - [Installation Guide](docs/source/installation.md)
 - [Usage Guide](docs/source/usage.md)
@@ -221,7 +222,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 - **Issues**: [GitHub Issues](https://github.com/gb119/jupyter_export_html_style/issues)
 - **Discussions**: [GitHub Discussions](https://github.com/gb119/jupyter_export_html_style/discussions)
-- **Documentation**: [Read the Docs](https://jupyter-export-html-style.readthedocs.io)
+- **Documentation**: [GitHub Pages](https://gb119.github.io/jupyter_export_html_style/)
 
 ## Citation
 

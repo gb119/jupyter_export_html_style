@@ -52,7 +52,7 @@ jupyterlab = [
 
 [project.urls]
 Homepage = "https://github.com/gb119/jupyter_export_html_style"
-Documentation = "https://jupyter-export-html-style.readthedocs.io"
+Documentation = "https://gb119.github.io/jupyter_export_html_style/"
 Repository = "https://github.com/gb119/jupyter_export_html_style"
 "Bug Tracker" = "https://github.com/gb119/jupyter_export_html_style/issues"
 

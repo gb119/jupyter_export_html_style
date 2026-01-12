@@ -43,7 +43,7 @@ about:
     This package provides a JupyterLab extension and nbconvert integration
     that allows exporting notebooks to HTML with custom cell-level styling
     based on metadata overrides.
-  doc_url: https://jupyter-export-html-style.readthedocs.io
+  doc_url: https://gb119.github.io/jupyter_export_html_style/
   dev_url: https://github.com/gb119/jupyter_export_html_style
 
 extra:
