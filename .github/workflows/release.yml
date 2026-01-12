@@ -59,7 +59,7 @@ jobs:
         path: dist/*.tar.gz
     
     - name: Publish to PyPI
-      if: secrets.PYPI_TOKEN != ''
+      if: secrets.PYPI_TOKEN
       env:
         TWINE_USERNAME: __token__
         TWINE_PASSWORD: ${{ secrets.PYPI_TOKEN }}
@@ -109,7 +109,7 @@ jobs:
     
     - name: Publish to Anaconda Cloud
       shell: bash -l {0}
-      if: env.PKG_PATH != '' && secrets.ANACONDA_TOKEN != ''
+      if: env.PKG_PATH != '' && secrets.ANACONDA_TOKEN
       env:
         ANACONDA_API_TOKEN: ${{ secrets.ANACONDA_TOKEN }}
       run: |
