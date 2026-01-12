@@ -240,21 +240,30 @@ class StyledHTMLExporter(HTMLExporter):
                     (str): HTML string with img src attributes converted to data URIs
                         for both attachment: URLs and file paths.
                 """
-                parsed_html = bs4.BeautifulSoup(html, features="html.parser")
-                imgs = parsed_html.find_all("img")
+                try:
+                    parsed_html = bs4.BeautifulSoup(html, features="html.parser")
+                    imgs = parsed_html.find_all("img")
 
-                # Replace img tags's sources by base64 dataurls
-                for img in imgs:
-                    src = img.attrs.get("src")
-                    if src is None:
-                        continue
+                    # Replace img tags's sources by base64 dataurls
+                    for img in imgs:
+                        src = img.attrs.get("src")
+                        if src is None:
+                            continue
 
-                    # Use _embed_image_or_attachment which handles both attachments and file paths
-                    embedded_src = self._embed_image_or_attachment(img.attrs["src"])
-                    if embedded_src != img.attrs["src"]:  # If it was converted
-                        img.attrs["src"] = embedded_src
+                        try:
+                            # Use _embed_image_or_attachment which handles both attachments and file paths
+                            embedded_src = self._embed_image_or_attachment(img.attrs["src"])
+                            if embedded_src != img.attrs["src"]:  # If it was converted
+                                img.attrs["src"] = embedded_src
+                        except Exception:
+                            # If embedding fails for any reason, leave the src unchanged
+                            # This ensures that individual image failures don't break the entire export
+                            pass
 
-                return str(parsed_html)
+                    return str(parsed_html)
+                except Exception:
+                    # If HTML parsing fails, return the original HTML unchanged
+                    return html
 
             # Apply the patch
             markdown_mistune.IPythonRenderer._html_embed_images = patched_html_embed_images
