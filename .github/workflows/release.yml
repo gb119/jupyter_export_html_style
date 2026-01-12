@@ -1,6 +1,12 @@
 # Release Workflow
 #
 # This workflow builds Python wheels and Conda packages when a new release is published.
+# It can also be triggered manually via the Actions tab.
+#
+# Manual Trigger Options:
+#   - build_wheel: Build Python wheel package (default: true)
+#   - build_conda: Build Conda package (default: true)
+#   - publish_packages: Publish to PyPI and Anaconda Cloud (default: false)
 #
 # Required secrets for publishing:
 #   ANACONDA_TOKEN: Anaconda Cloud API token for uploading conda packages
@@ -17,11 +23,28 @@ on:
   release:
     types: [published]
   workflow_dispatch:
+    inputs:
+      publish_packages:
+        description: 'Publish packages to PyPI and Anaconda Cloud'
+        required: false
+        type: boolean
+        default: false
+      build_wheel:
+        description: 'Build Python wheel package'
+        required: false
+        type: boolean
+        default: true
+      build_conda:
+        description: 'Build Conda package'
+        required: false
+        type: boolean
+        default: true
 
 jobs:
   build-wheel:
     name: Build Python Wheel
     runs-on: ubuntu-latest
+    if: ${{ github.event_name == 'release' || (github.event_name == 'workflow_dispatch' && inputs.build_wheel) }}
     permissions:
       contents: read
     
@@ -59,7 +82,7 @@ jobs:
         path: dist/*.tar.gz
     
     - name: Publish to PyPI
-      if: secrets.PYPI_TOKEN
+      if: ${{ github.event_name == 'release' || (github.event_name == 'workflow_dispatch' && inputs.publish_packages) }}
       env:
         TWINE_USERNAME: __token__
         TWINE_PASSWORD: ${{ secrets.PYPI_TOKEN }}
@@ -70,6 +93,7 @@ jobs:
   build-conda:
     name: Build Conda Package
     runs-on: ubuntu-latest
+    if: ${{ github.event_name == 'release' || (github.event_name == 'workflow_dispatch' && inputs.build_conda) }}
     permissions:
       contents: read
     
@@ -109,7 +133,7 @@ jobs:
     
     - name: Publish to Anaconda Cloud
       shell: bash -l {0}
-      if: env.PKG_PATH != '' && secrets.ANACONDA_TOKEN
+      if: ${{ env.PKG_PATH != '' && (github.event_name == 'release' || (github.event_name == 'workflow_dispatch' && inputs.publish_packages)) }}
       env:
         ANACONDA_API_TOKEN: ${{ secrets.ANACONDA_TOKEN }}
       run: |
