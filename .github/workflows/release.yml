@@ -57,6 +57,13 @@ jobs:
       with:
         name: python-sdist
         path: dist/*.tar.gz
+    
+    - name: Publish to PyPI
+      env:
+        TWINE_USERNAME: __token__
+        TWINE_PASSWORD: ${{ secrets.PYPI_TOKEN }}
+      run: |
+        twine upload dist/*
 
   build-conda:
     name: Build Conda Package
@@ -97,3 +104,11 @@ jobs:
       with:
         name: conda-package
         path: ${{ env.PKG_PATH }}
+    
+    - name: Publish to Anaconda Cloud
+      shell: bash -l {0}
+      if: env.PKG_PATH != ''
+      env:
+        ANACONDA_TOKEN: ${{ secrets.ANACONDA_TOKEN }}
+      run: |
+        anaconda upload --token $ANACONDA_TOKEN $PKG_PATH
