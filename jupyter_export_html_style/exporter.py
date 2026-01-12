@@ -47,7 +47,7 @@ class StyledHTMLExporter(HTMLExporter):
     def __init__(self, **kw):
         """Initialize the exporter and register the style preprocessor.
 
-        Keyword Parameters:
+        Args:
             **kw (dict): Additional keyword arguments passed to the parent
                 HTMLExporter class.
         """
@@ -63,8 +63,6 @@ class StyledHTMLExporter(HTMLExporter):
             nb (NotebookNode): The notebook to convert.
             resources (dict, optional): Additional resources used in the conversion
                 process. If None, an empty dictionary is created. Defaults to None.
-
-        Keyword Parameters:
             **kw (dict): Additional keyword arguments passed to the parent
                 from_notebook_node method.
 
