@@ -1,6 +1,6 @@
 # Jupyter Export HTML Style
 
-[![Build Status](https://github.com/gb119/jupyter_export_html_style/workflows/Build%20and%20Test/badge.svg)](https://github.com/gb119/jupyter_export_html_style/actions)
+[![Test](https://github.com/gb119/jupyter_export_html_style/actions/workflows/test.yml/badge.svg)](https://github.com/gb119/jupyter_export_html_style/actions/workflows/test.yml)
 [![Documentation](https://img.shields.io/badge/docs-GitHub%20Pages-blue)](https://gb119.github.io/jupyter_export_html_style/)
 [![PyPI version](https://badge.fury.io/py/jupyter-export-html-style.svg)](https://pypi.org/project/jupyter-export-html-style/)
 [![Conda Version](https://img.shields.io/conda/vn/phygbu/jupyter-export-html-style.svg)](https://anaconda.org/phygbu/jupyter-export-html-style)
