@@ -44,7 +44,7 @@ jobs:
     
     - name: Check wheel
       run: |
-        twine check dist/*
+        twine check --verbose dist/*
     
     - name: Upload wheel artifact
       uses: actions/upload-artifact@v4
@@ -64,7 +64,7 @@ jobs:
         TWINE_PASSWORD: ${{ secrets.PYPI_TOKEN }}
       run: |
         # --skip-existing prevents failures if version already uploaded (e.g., during manual re-runs)
-        twine upload --skip-existing dist/*
+        twine upload --verbose --skip-existing dist/*
 
   build-conda:
     name: Build Conda Package
