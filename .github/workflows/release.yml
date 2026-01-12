@@ -44,7 +44,7 @@ jobs:
     
     - name: Check wheel
       run: |
-        twine check --verbose dist/*
+        twine check dist/*
     
     - name: Upload wheel artifact
       uses: actions/upload-artifact@v4
@@ -94,7 +94,7 @@ jobs:
         conda build conda.recipe
         # Find and save the package path
         # Modern conda-build creates .conda packages, but may also create .tar.bz2
-        CONDA_BLD_PATH=$(conda info --base)/envs/test/conda-build
+        CONDA_BLD_PATH=/usr/share/miniconda/envs/test/conda-bld/noarch/
         PKG_PATH=$(find $CONDA_BLD_PATH -name "jupyter-export-html-style*.conda" -o -name "jupyter-export-html-style*.tar.bz2" | head -1)
         echo "PKG_PATH=$PKG_PATH" >> $GITHUB_ENV
         echo "Found package at: $PKG_PATH"
