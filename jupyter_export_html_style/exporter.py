@@ -239,7 +239,7 @@ class StyledHTMLExporter(HTMLExporter):
                     try:
                         file_path = os.path.join(base_path, ss)
                         if os.path.isfile(file_path):
-                            with open(file_path, "r", encoding="utf-8") as f:
+                            with open(file_path, encoding="utf-8") as f:
                                 css_content = f.read()
                                 blocks.append(
                                     f"\n<style>\n/* Embedded stylesheet: {ss} */\n{css_content}\n</style>\n"

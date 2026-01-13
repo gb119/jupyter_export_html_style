@@ -533,9 +533,7 @@ def test_mixed_local_and_remote_css():
         resources = {"metadata": {"path": tmpdir}}
 
         exporter = StyledHTMLExporter()
-        notebook_styles = {
-            "stylesheet": ["local.css", "https://example.com/remote.css"]
-        }
+        notebook_styles = {"stylesheet": ["local.css", "https://example.com/remote.css"]}
         style_block = exporter._generate_notebook_style_block(notebook_styles, resources)
 
         # Verify local CSS is embedded
