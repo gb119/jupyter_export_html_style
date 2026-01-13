@@ -513,7 +513,9 @@ def test_embed_attachment_in_html_img_tag():
     md_cell = new_markdown_cell('Test image: <img src="attachment:test.png" />')
 
     # Add the image as an attachment to the cell
-    md_cell["attachments"] = {"test.png": {"image/png": base64.b64encode(TEST_IMAGE_PNG).decode("ascii")}}
+    md_cell["attachments"] = {
+        "test.png": {"image/png": base64.b64encode(TEST_IMAGE_PNG).decode("ascii")}
+    }
 
     nb.cells.append(md_cell)
 
@@ -557,7 +559,9 @@ def test_attachment_in_html_img_tag_disabled():
     md_cell = new_markdown_cell('Test image: <img src="attachment:test.png" />')
 
     # Add the image as an attachment to the cell
-    md_cell["attachments"] = {"test.png": {"image/png": base64.b64encode(TEST_IMAGE_PNG).decode("ascii")}}
+    md_cell["attachments"] = {
+        "test.png": {"image/png": base64.b64encode(TEST_IMAGE_PNG).decode("ascii")}
+    }
 
     nb.cells.append(md_cell)
 
@@ -569,7 +573,9 @@ def test_attachment_in_html_img_tag_disabled():
     # because the HTML embedding only runs when embed_images=True
     # Note: If using markdown syntax ![](attachment:...), the ExtractAttachmentsPreprocessor
     # would convert it to a file path
-    assert 'src="attachment:test.png"' in output, "Attachment URL should remain when embed_images=False"
+    assert (
+        'src="attachment:test.png"' in output
+    ), "Attachment URL should remain when embed_images=False"
 
 
 def test_css_selectors_match_html_elements():
