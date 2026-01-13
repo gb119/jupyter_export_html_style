@@ -6,7 +6,7 @@
 [![Conda Version](https://img.shields.io/conda/vn/phygbu/jupyter-export-html-style.svg)](https://anaconda.org/phygbu/jupyter-export-html-style)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-A JupyterLab extension and nbconvert preprocessor/exporter that allows custom cell-level styling when exporting notebooks to HTML.
+A JupyterLab extension and nbconvert preprocessor/exporter that allows custom cell-level styling when exporting notebooks to HTML and PDF.
 
 ## Features
 
@@ -15,6 +15,7 @@ A JupyterLab extension and nbconvert preprocessor/exporter that allows custom ce
 - 📝 **Notebook-Level Styling**: Add custom styles and stylesheets to the entire notebook
 - 📦 **Resource Embedding**: Automatically embeds local CSS files as inline styles for self-contained HTML
 - 🔧 **nbconvert Integration**: Seamlessly integrates with nbconvert's export pipeline
+- 📄 **PDF Export with Styles**: Export to PDF via HTML with all custom styles applied
 - 🚀 **Easy to Use**: Simple metadata-based configuration
 - 🎁 **Multiple Distribution Channels**: Available via pip and conda
 - 🔌 **Extensible**: Built on nbconvert's preprocessor architecture
@@ -62,6 +63,8 @@ In your Jupyter notebook, add style metadata to cells:
 
 ### 2. Export with Custom Styles
 
+#### HTML Export
+
 From the command line:
 
 ```bash
@@ -75,6 +78,32 @@ from jupyter_export_html_style import StyledHTMLExporter
 
 exporter = StyledHTMLExporter()
 (body, resources) = exporter.from_filename('notebook.ipynb')
+```
+
+#### PDF Export (with Styles)
+
+Export to PDF via HTML with all custom styles applied:
+
+From the command line:
+
+```bash
+jupyter nbconvert --to styled_webpdf notebook.ipynb
+```
+
+Or using Python:
+
+```python
+from jupyter_export_html_style import StyledWebPDFExporter
+
+exporter = StyledWebPDFExporter()
+(body, resources) = exporter.from_filename('notebook.ipynb')
+```
+
+**Note**: PDF export requires [Playwright](https://playwright.dev/) to be installed:
+
+```bash
+pip install nbconvert[webpdf]
+playwright install chromium
 ```
 
 ## Usage Examples

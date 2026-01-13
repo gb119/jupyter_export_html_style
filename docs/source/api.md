@@ -124,6 +124,81 @@ The main module providing nbconvert integration for styled HTML export.
       :rtype: str
 ```
 
+## StyledWebPDFExporter
+
+```{eval-rst}
+.. class:: StyledWebPDFExporter
+
+   A PDF exporter that supports cell-level and notebook-level style customization.
+   
+   This exporter extends StyledHTMLExporter to generate PDF files via HTML using
+   Playwright and Chromium. It preserves all custom styles, embedded images, and
+   formatting when converting to PDF.
+   
+   **Supported Features:**
+   
+   - All features from StyledHTMLExporter (cell styles, notebook styles, embedded images)
+   - PDF generation with Playwright and Chromium
+   - Configurable pagination
+   - Single-page or multi-page output
+   - Container-friendly operation
+
+   .. attribute:: template_name
+      :type: str
+      :value: "webpdf"
+      
+      Name of the template to use for HTML generation before PDF conversion.
+
+   .. attribute:: paginate
+      :type: bool
+      :value: True
+      
+      Split the notebook into multiple pages. Set to False for a single long page.
+
+   .. attribute:: allow_chromium_download
+      :type: bool
+      :value: False
+      
+      Whether to allow downloading Chromium if no suitable version is found.
+
+   .. attribute:: disable_sandbox
+      :type: bool
+      :value: False
+      
+      Disable Chromium security sandbox. Required for container environments but
+      reduces security. Use with caution.
+
+   .. method:: from_notebook_node(nb, resources=None, **kw)
+   
+      Convert a notebook node to PDF with style support.
+      
+      First generates HTML using StyledHTMLExporter (including all custom styles),
+      then converts the HTML to PDF using Playwright and Chromium.
+      
+      :param nb: The notebook to convert
+      :type nb: NotebookNode
+      :param resources: Additional resources used in the conversion process
+      :type resources: dict, optional
+      :param kw: Additional keyword arguments
+      :type kw: dict
+      :return: Tuple of PDF data and updated resources
+      :rtype: tuple(bytes, dict)
+      :raises RuntimeError: If Playwright is not installed or Chromium is not found
+
+   .. method:: run_playwright(html)
+   
+      Run Playwright to convert HTML to PDF.
+      
+      Launches Chromium, loads the HTML content, and generates a PDF with the
+      specified settings (pagination, page size, etc.).
+      
+      :param html: The HTML content to convert to PDF
+      :type html: str
+      :return: PDF data as bytes
+      :rtype: bytes
+      :raises RuntimeError: If Playwright is not installed or Chromium is not found
+```
+
 ## Module-Level Attributes
 
 ```{eval-rst}
@@ -254,6 +329,60 @@ config.StyledHTMLExporter.template_name = "lab"
 exporter = StyledHTMLExporter(config=config)
 ```
 
+### Using StyledWebPDFExporter
+
+```python
+from jupyter_export_html_style import StyledWebPDFExporter
+
+# Create exporter with default settings
+exporter = StyledWebPDFExporter()
+
+# Export notebook to PDF
+(pdf_data, resources) = exporter.from_filename('notebook.ipynb')
+
+# Save to file
+with open('output.pdf', 'wb') as f:
+    f.write(pdf_data)
+```
+
+### PDF Export with Custom Options
+
+```python
+from jupyter_export_html_style import StyledWebPDFExporter
+
+# Create exporter with custom settings
+exporter = StyledWebPDFExporter(
+    paginate=False,  # Single long page
+    allow_chromium_download=True,  # Auto-download Chromium if needed
+    disable_sandbox=False  # Keep sandbox enabled (default)
+)
+
+# Export notebook to PDF
+(pdf_data, resources) = exporter.from_filename('styled_notebook.ipynb')
+
+# Save to file
+with open('styled_output.pdf', 'wb') as f:
+    f.write(pdf_data)
+```
+
+### PDF Export in Container Environments
+
+```python
+from jupyter_export_html_style import StyledWebPDFExporter
+
+# For Docker/Kubernetes, disable sandbox
+exporter = StyledWebPDFExporter(
+    disable_sandbox=True  # Required in most containers
+)
+
+# Export notebook to PDF
+(pdf_data, resources) = exporter.from_filename('notebook.ipynb')
+
+# Save to file
+with open('output.pdf', 'wb') as f:
+    f.write(pdf_data)
+```
+
 ## Entry Points
 
 The package registers the following nbconvert entry points:
@@ -265,11 +394,16 @@ The package registers the following nbconvert entry points:
 ### Exporters
 
 - `styled_html`: Points to `jupyter_export_html_style.exporter:StyledHTMLExporter`
+- `styled_webpdf`: Points to `jupyter_export_html_style.webpdf_exporter:StyledWebPDFExporter`
 
 These can be used directly with nbconvert command line:
 
 ```bash
+# Export to styled HTML
 jupyter nbconvert --to styled_html notebook.ipynb
+
+# Export to styled PDF
+jupyter nbconvert --to styled_webpdf notebook.ipynb
 ```
 
 ## See Also
