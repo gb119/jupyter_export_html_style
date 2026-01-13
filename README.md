@@ -19,9 +19,7 @@ A JupyterLab extension and nbconvert preprocessor/exporter that allows custom ce
 - 🔧 **nbconvert Integration**: Seamlessly integrates with nbconvert's export pipeline
 - 📄 **PDF Export with Styles**: Export to PDF via HTML with all custom styles applied
 - 🚀 **Easy to Use**: Simple metadata-based configuration
-- 🎁 **Multiple Distribution Channels**: Available via pip and conda
-- 🔌 **Extensible**: Built on nbconvert's preprocessor architecture
-- 🔒 **Secure**: Protected against path traversal attacks
+
 
 ## Installation
 
