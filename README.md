@@ -5,6 +5,7 @@
 [![PyPI version](https://badge.fury.io/py/jupyter-export-html-style.svg)](https://pypi.org/project/jupyter-export-html-style/)
 [![Conda Version](https://img.shields.io/conda/vn/phygbu/jupyter-export-html-style.svg)](https://anaconda.org/phygbu/jupyter-export-html-style)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![DOI](https://zenodo.org/badge/1132382644.svg)](https://doi.org/10.5281/zenodo.18231801)
 
 A JupyterLab extension and nbconvert preprocessor/exporter that allows custom cell-level styling when exporting notebooks to HTML and PDF.
 
