@@ -21,7 +21,7 @@ def test_styled_webpdf_exporter_initialization():
     """Test that StyledWebPDFExporter can be initialized."""
     exporter = StyledWebPDFExporter()
     assert exporter.template_name == "webpdf"
-    assert exporter.export_from_notebook == "Styled PDF via HTML"
+    assert exporter.export_from_notebook == "PDF via HTML (with styles)"
 
 
 def test_styled_webpdf_exporter_inherits_from_styled_html():

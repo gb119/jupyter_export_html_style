@@ -106,6 +106,15 @@ pip install nbconvert[webpdf]
 playwright install chromium
 ```
 
+#### JupyterLab Integration
+
+In JupyterLab, the exporters are available in the **File → Save and Export Notebook As...** menu with user-friendly names:
+
+- **HTML (with styles)** - Export to HTML with custom cell and notebook styles
+- **PDF via HTML (with styles)** - Export to PDF via HTML with custom styles applied
+
+These menu entries correspond to the `styled_html` and `styled_webpdf` exporters used in the command line examples above.
+
 ## Usage Examples
 
 ### Cell-Level Styling
