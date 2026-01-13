@@ -2,19 +2,15 @@
 Custom HTML exporter with style support.
 """
 
+import base64
+import mimetypes
 import os
-import threading
 
 import bs4
 from nbconvert.exporters import HTMLExporter
-from nbconvert.filters import markdown_mistune
 from traitlets import Unicode
 
 from .preprocessor import StylePreprocessor
-
-# Module-level lock for thread-safe patching
-_patch_lock = threading.Lock()
-_is_patched = False
 
 
 class StyledHTMLExporter(HTMLExporter):
@@ -48,7 +44,10 @@ class StyledHTMLExporter(HTMLExporter):
 
         Images in markdown cells are embedded as base64 data URIs by default,
         making the exported HTML self-contained without requiring external
-        image files.
+        image files. Image embedding is performed on the final HTML output
+        rather than during markdown rendering, which ensures that explicit
+        HTML elements (such as <div> tags) in markdown cells are preserved
+        correctly without having their content stripped.
 
     Examples:
         >>> from jupyter_export_html_style import StyledHTMLExporter
@@ -71,11 +70,6 @@ class StyledHTMLExporter(HTMLExporter):
             **kw (dict): Additional keyword arguments passed to the parent
                 HTMLExporter class.
         """
-        # Enable image embedding by default unless explicitly set
-        # Note: **kw creates a new dict, so this doesn't modify caller's data
-        if "embed_images" not in kw:
-            kw["embed_images"] = True
-
         # Add custom template directory to the search path before initialization
         template_path = os.path.join(os.path.dirname(__file__), "templates")
         if "extra_template_basedirs" in kw:
@@ -84,15 +78,15 @@ class StyledHTMLExporter(HTMLExporter):
         else:
             kw["extra_template_basedirs"] = [template_path]
 
+        # Enable image embedding by default unless explicitly set
+        # Note: We'll handle embedding ourselves to avoid the bug
+        if "embed_images" not in kw:
+            kw["embed_images"] = True
+
         super().__init__(**kw)
 
         # Register the style preprocessor
         self.register_preprocessor(StylePreprocessor, enabled=True)
-
-        # Patch nbconvert's markdown filter to handle attachment: URLs in img tags
-        # This fixes a bug where <img src="attachment:..."> tags are not embedded
-        # even when embed_images=True
-        self._patch_markdown_filter()
 
     def from_notebook_node(self, nb, resources=None, **kw):
         """Convert a notebook node to HTML with style support.
@@ -109,8 +103,31 @@ class StyledHTMLExporter(HTMLExporter):
                 - output (str): The HTML output with injected style blocks.
                 - resources (dict): Updated resources dictionary.
         """
-        # Process the notebook with our preprocessor
-        output, resources = super().from_notebook_node(nb, resources, **kw)
+        # Save the user's embed_images preference
+        should_embed = self.embed_images
+
+        # Temporarily disable parent's embed_images to avoid the bug where
+        # BeautifulSoup auto-closes incomplete HTML fragments during markdown rendering
+        self.embed_images = False
+
+        try:
+            # Process the notebook with our preprocessor
+            output, resources = super().from_notebook_node(nb, resources, **kw)
+        finally:
+            # Restore embed_images setting
+            self.embed_images = should_embed
+
+        # Collect attachments from notebook cells for image embedding
+        attachments = {}
+        for cell in nb.cells:
+            if hasattr(cell, "attachments") and cell.attachments:
+                attachments.update(cell.attachments)
+
+        # Embed images in the final HTML if image embedding is enabled
+        # This processes the complete HTML document after all rendering is done,
+        # which avoids issues with BeautifulSoup auto-closing incomplete HTML fragments
+        if should_embed:
+            output = self._embed_images_in_html(output, attachments, resources)
 
         # Prepare all custom style blocks to inject before </head>
         style_blocks = []
@@ -206,65 +223,79 @@ class StyledHTMLExporter(HTMLExporter):
 
         return "".join(blocks)
 
-    def _patch_markdown_filter(self):
-        """Patch nbconvert's markdown filter to handle attachment: URLs in img tags.
+    def _embed_images_in_html(self, html, attachments, resources):
+        """Embed images in the final HTML output.
 
-        This method patches the IPythonRenderer._html_embed_images method to properly
-        handle attachment: URLs in HTML img tags when embed_images is enabled.
+        This method processes the complete HTML document after all rendering is done,
+        replacing image src attributes with base64 data URIs. This approach avoids
+        the issue where BeautifulSoup auto-closes incomplete HTML fragments when
+        processing individual block_html tokens during markdown rendering.
+
+        Args:
+            html (str): Complete HTML document.
+            attachments (dict): Dictionary of attachments from notebook cells.
+            resources (dict): Resources dictionary from the conversion process.
+
+        Returns:
+            (str): HTML with embedded images.
 
         Notes:
-            This is a workaround for a bug in nbconvert where <img src="attachment:...">
-            tags are not embedded even when embed_images=True. The standard nbconvert
-            _html_embed_images method only calls _src_to_base64() which handles file
-            paths, but doesn't handle attachment: URLs. This patch makes it use
-            _embed_image_or_attachment() instead, which handles both cases.
-
-            The patch is applied globally to nbconvert's IPythonRenderer class and is
-            thread-safe using a module-level lock. Once applied, it affects all
-            subsequent uses of nbconvert's markdown renderer.
+            This method handles:
+            - File path references (e.g., src="image.png")
+            - Attachment references (e.g., src="attachment:image.png")
+            - Already embedded data URIs (skipped)
+            - HTTP/HTTPS URLs (skipped for security and performance)
         """
-        global _is_patched
+        try:
+            soup = bs4.BeautifulSoup(html, features="html.parser")
+            imgs = soup.find_all("img")
 
-        # Use a lock to ensure thread-safe patching
-        with _patch_lock:
-            if _is_patched:
-                return
+            # Get the base path from resources if available
+            base_path = resources.get("metadata", {}).get("path", ".")
 
-            def patched_html_embed_images(self, html: str) -> str:
-                """Patched version that handles attachment: URLs in img tags.
+            for img in imgs:
+                src = img.attrs.get("src")
+                if src is None or not src:
+                    continue
 
-                Args:
-                    html (str): HTML string containing img tags.
+                # Skip already embedded data URIs
+                if src.startswith("data:"):
+                    continue
 
-                Returns:
-                    (str): HTML string with img src attributes converted to data URIs
-                        for both attachment: URLs and file paths.
-                """
+                # Skip HTTP/HTTPS URLs
+                if src.startswith(("http://", "https://")):
+                    continue
+
                 try:
-                    parsed_html = bs4.BeautifulSoup(html, features="html.parser")
-                    imgs = parsed_html.find_all("img")
-
-                    # Replace img tags's sources by base64 dataurls
-                    for img in imgs:
-                        src = img.attrs.get("src")
-                        if src is None:
-                            continue
-
-                        try:
-                            # Use _embed_image_or_attachment which handles both attachments and file paths
-                            embedded_src = self._embed_image_or_attachment(img.attrs["src"])
-                            if embedded_src != img.attrs["src"]:  # If it was converted
-                                img.attrs["src"] = embedded_src
-                        except Exception:
-                            # If embedding fails for any reason, leave the src unchanged
-                            # This ensures that individual image failures don't break the entire export
-                            pass
-
-                    return str(parsed_html)
+                    # Handle attachment: URLs
+                    if src.startswith("attachment:"):
+                        img_name = src[len("attachment:") :]
+                        if img_name in attachments:
+                            # Attachments can have multiple mime types, pick the first available
+                            attachment_data = attachments[img_name]
+                            for mime_type, data in attachment_data.items():
+                                # Data is already base64 encoded in attachments
+                                img.attrs["src"] = f"data:{mime_type};base64,{data}"
+                                break
+                    # Handle file path references
+                    else:
+                        file_path = os.path.join(base_path, src)
+                        if os.path.isfile(file_path):
+                            with open(file_path, "rb") as f:
+                                file_data = f.read()
+                                # Guess MIME type from file extension
+                                mime_type, _ = mimetypes.guess_type(file_path)
+                                if mime_type is None:
+                                    # Default to png if we can't determine type
+                                    mime_type = "image/png"
+                                b64_data = base64.b64encode(file_data).decode("utf-8")
+                                img.attrs["src"] = f"data:{mime_type};base64,{b64_data}"
                 except Exception:
-                    # If HTML parsing fails, return the original HTML unchanged
-                    return html
+                    # If embedding fails for any reason, leave the src unchanged
+                    # This ensures that individual image failures don't break the entire export
+                    pass
 
-            # Apply the patch
-            markdown_mistune.IPythonRenderer._html_embed_images = patched_html_embed_images
-            _is_patched = True
+            return str(soup)
+        except Exception:
+            # If HTML parsing fails, return the original HTML unchanged
+            return html

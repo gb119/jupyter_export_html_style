@@ -18,6 +18,7 @@ Note on Implementation:
     elements don't currently have the matching IDs.
 """
 
+import base64
 import os
 import re
 import tempfile
@@ -506,14 +507,14 @@ def test_embed_attachment_in_html_img_tag():
     This test verifies the fix for the issue where <img src="attachment:...">
     tags in markdown cells were not being embedded even when embed_images=True.
     """
-    import base64
-
     # Create a notebook with markdown cell containing HTML img tag with attachment
     nb = new_notebook()
     md_cell = new_markdown_cell('Test image: <img src="attachment:test.png" />')
 
     # Add the image as an attachment to the cell
-    md_cell["attachments"] = {"test.png": {"image/png": base64.b64encode(TEST_IMAGE_PNG).decode("ascii")}}
+    md_cell["attachments"] = {
+        "test.png": {"image/png": base64.b64encode(TEST_IMAGE_PNG).decode("ascii")}
+    }
 
     nb.cells.append(md_cell)
 
@@ -550,14 +551,14 @@ def test_attachment_in_html_img_tag_disabled():
     in HTML img tags (not markdown syntax), they remain as attachment URLs
     because the HTML embedding patch only runs when embed_images=True.
     """
-    import base64
-
     # Create a notebook with markdown cell containing HTML img tag with attachment
     nb = new_notebook()
     md_cell = new_markdown_cell('Test image: <img src="attachment:test.png" />')
 
     # Add the image as an attachment to the cell
-    md_cell["attachments"] = {"test.png": {"image/png": base64.b64encode(TEST_IMAGE_PNG).decode("ascii")}}
+    md_cell["attachments"] = {
+        "test.png": {"image/png": base64.b64encode(TEST_IMAGE_PNG).decode("ascii")}
+    }
 
     nb.cells.append(md_cell)
 
@@ -569,7 +570,9 @@ def test_attachment_in_html_img_tag_disabled():
     # because the HTML embedding only runs when embed_images=True
     # Note: If using markdown syntax ![](attachment:...), the ExtractAttachmentsPreprocessor
     # would convert it to a file path
-    assert 'src="attachment:test.png"' in output, "Attachment URL should remain when embed_images=False"
+    assert (
+        'src="attachment:test.png"' in output
+    ), "Attachment URL should remain when embed_images=False"
 
 
 def test_css_selectors_match_html_elements():
@@ -614,3 +617,59 @@ def test_css_selectors_match_html_elements():
     assert css_rules["#cell-0"]["background-color"] == "#f0f0f0"
     assert css_rules["#cell-1-input"]["color"] == "red"
     assert css_rules["#cell-2-output"]["border"] == "1px solid blue"
+
+
+def test_explicit_div_with_class_preserves_content():
+    """Test that explicit div tags with class attributes preserve their content.
+
+    This is a regression test for the issue where explicit HTML div tags
+    in markdown cells had their content stripped when embed_images=True.
+    The issue was caused by BeautifulSoup parsing incomplete HTML fragments
+    (opening tags only) and auto-closing them, which moved content outside.
+    """
+    exporter = StyledHTMLExporter()
+
+    # Create notebook with markdown cell containing explicit div with class
+    md_content = """Some text in *normal* markdown
+
+<div class="alert">
+
+An explicit div contains text. The div has a class attribute.
+
+</div>
+
+More text outside the div"""
+
+    nb = new_notebook(cells=[new_markdown_cell(md_content)])
+
+    output, resources = exporter.from_notebook_node(nb)
+
+    # Parse HTML
+    soup = _parse_html(output)
+
+    # Find the div with class="alert"
+    alert_div = soup.find("div", class_="alert")
+
+    # Verify the div exists
+    assert alert_div is not None, "div with class='alert' not found in output"
+
+    # Verify the div contains the expected content
+    div_text = alert_div.get_text(strip=True)
+    assert (
+        "An explicit div contains text" in div_text
+    ), f"Expected content not found in div. Found: {div_text}"
+    assert "class attribute" in div_text, f"Expected content not found in div. Found: {div_text}"
+
+    # Verify the content is INSIDE the div, not outside it
+    # Get the parent of the paragraph
+    alert_paragraphs = alert_div.find_all("p")
+    assert len(alert_paragraphs) > 0, "No paragraphs found inside the alert div"
+
+    # Verify the specific paragraph exists inside the div
+    found_content = False
+    for p in alert_paragraphs:
+        if "explicit div contains text" in p.get_text():
+            found_content = True
+            break
+
+    assert found_content, "Content paragraph not found inside the alert div"
