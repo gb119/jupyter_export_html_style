@@ -6,18 +6,15 @@ WebPDFExporter functionality to use StyledHTMLExporter for HTML generation,
 ensuring that cell styles and embedded images are included in the PDF output.
 """
 
+from importlib import util as importlib_util
+
 import pytest
 from nbformat.v4 import new_code_cell, new_markdown_cell, new_notebook
 
 from jupyter_export_html_style import StyledWebPDFExporter
 
 # Check if playwright is available
-try:
-    import playwright  # noqa: F401
-
-    PLAYWRIGHT_AVAILABLE = True
-except ImportError:
-    PLAYWRIGHT_AVAILABLE = False
+PLAYWRIGHT_AVAILABLE = importlib_util.find_spec("playwright") is not None
 
 
 def test_styled_webpdf_exporter_initialization():

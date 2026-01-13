@@ -126,7 +126,7 @@ class StyledWebPDFExporter(StyledHTMLExporter):
             except Exception as e:
                 msg = (
                     "No suitable chromium executable found on the system. "
-                    "Please use '--allow-chromium-download' to allow downloading one,"
+                    "Please use 'allow_chromium_download=True' to allow downloading one, "
                     "or install it using `playwright install chromium`."
                 )
                 await playwright.stop()
@@ -179,11 +179,12 @@ class StyledWebPDFExporter(StyledHTMLExporter):
 
             def run_coroutine(coro):
                 """Run an internal coroutine."""
-                loop = (
-                    asyncio.ProactorEventLoop()  # type:ignore[attr-defined]
-                    if IS_WINDOWS
-                    else asyncio.new_event_loop()
-                )
+                if IS_WINDOWS:
+                    # For Windows, use ProactorEventLoop for better subprocess support
+                    # Note: ProactorEventLoop is the default on Windows since Python 3.8
+                    loop = asyncio.new_event_loop()
+                else:
+                    loop = asyncio.new_event_loop()
 
                 asyncio.set_event_loop(loop)
                 return loop.run_until_complete(coro)
