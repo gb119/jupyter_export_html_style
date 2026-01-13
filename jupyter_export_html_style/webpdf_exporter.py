@@ -180,8 +180,10 @@ class StyledWebPDFExporter(StyledHTMLExporter):
             def run_coroutine(coro):
                 """Run an internal coroutine."""
                 if IS_WINDOWS:
-                    # For Windows, use ProactorEventLoop for better subprocess support
-                    # Note: ProactorEventLoop is the default on Windows since Python 3.8
+                    # For Windows, explicitly set WindowsProactorEventLoopPolicy for subprocess support
+                    # This is required when running asyncio in a thread pool on Windows
+                    # See: https://docs.python.org/3/library/asyncio-platforms.html#windows
+                    asyncio.set_event_loop_policy(asyncio.WindowsProactorEventLoopPolicy())
                     loop = asyncio.new_event_loop()
                 else:
                     loop = asyncio.new_event_loop()
