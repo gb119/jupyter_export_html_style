@@ -118,6 +118,7 @@ def test_styled_html_exporter_initialization():
     """Test that StyledHTMLExporter can be initialized."""
     exporter = StyledHTMLExporter()
     assert exporter.template_name == "styled"
+    assert exporter.export_from_notebook == "HTML (with styles)"
 
 
 def test_export_notebook_without_styles():

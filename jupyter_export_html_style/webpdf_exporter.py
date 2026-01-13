@@ -44,7 +44,7 @@ class StyledWebPDFExporter(StyledHTMLExporter):
         >>> output, resources = exporter.from_notebook_node(notebook)
     """
 
-    export_from_notebook = "Styled PDF via HTML"
+    export_from_notebook = "PDF via HTML (with styles)"
 
     allow_chromium_download = Bool(
         False,

@@ -58,7 +58,7 @@ class StyledHTMLExporter(HTMLExporter):
         >>> exporter = StyledHTMLExporter(embed_images=False)
     """
 
-    export_from_notebook = "Styled HTML Export"
+    export_from_notebook = "HTML (with styles)"
 
     # Custom template file (can be overridden)
     template_name = Unicode("styled", help="Name of the template to use").tag(config=True)
