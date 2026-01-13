@@ -222,6 +222,8 @@ Style the input and output areas of a cell separately:
 
 Add custom styles and stylesheets to the entire notebook by adding metadata to the notebook (not individual cells):
 
+**Note:** As of the latest version, local or relative CSS file paths will be automatically embedded as inline styles in the exported HTML, making the file self-contained. Remote URLs (http:// or https://) will remain as external `<link>` tags.
+
 #### Via Notebook Interface
 
 1. Open the notebook metadata editor (Edit → Edit Notebook Metadata)
@@ -230,7 +232,18 @@ Add custom styles and stylesheets to the entire notebook by adding metadata to t
 ```json
 {
   "style": ".jp-Cell { box-shadow: 0 2px 4px rgba(0,0,0,0.1); }",
-  "stylesheet": "https://example.com/custom-theme.css"
+  "stylesheet": "custom-theme.css"
+}
+```
+
+Or with both local and remote stylesheets:
+
+```json
+{
+  "stylesheet": [
+    "custom-theme.css",
+    "https://example.com/remote-theme.css"
+  ]
 }
 ```
 
@@ -256,16 +269,18 @@ body {
 }
 """
 
-# Add external stylesheet(s)
+# Add stylesheets - local files will be embedded, remote URLs will be linked
 nb.metadata['stylesheet'] = [
-    'https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500&display=swap',
-    'https://example.com/custom-theme.css'
+    'local-styles.css',  # Will be embedded as inline styles
+    'https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500&display=swap',  # Will remain as <link> tag
 ]
 
 # Save notebook
 with open('notebook.ipynb', 'w') as f:
     nbformat.write(nb, f)
 ```
+
+**Security Note:** Path traversal attempts (e.g., `../../../etc/passwd`) are automatically blocked and will fallback to `<link>` tags.
 
 ### Example 6: Complete Styled Notebook
 

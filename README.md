@@ -13,10 +13,12 @@ A JupyterLab extension and nbconvert preprocessor/exporter that allows custom ce
 - 🎨 **Custom Cell Styling**: Apply CSS styles to individual cells via metadata
 - 🎯 **Input/Output Styling**: Separate styles for cell inputs and outputs
 - 📝 **Notebook-Level Styling**: Add custom styles and stylesheets to the entire notebook
+- 📦 **Resource Embedding**: Automatically embeds local CSS files as inline styles for self-contained HTML
 - 🔧 **nbconvert Integration**: Seamlessly integrates with nbconvert's export pipeline
 - 🚀 **Easy to Use**: Simple metadata-based configuration
-- 📦 **Multiple Distribution Channels**: Available via pip and conda
+- 🎁 **Multiple Distribution Channels**: Available via pip and conda
 - 🔌 **Extensible**: Built on nbconvert's preprocessor architecture
+- 🔒 **Secure**: Protected against path traversal attacks
 
 ## Installation
 
@@ -160,6 +162,8 @@ Style the input and output areas of cells separately:
 
 Add custom styles and stylesheets that apply to the entire notebook. Add these to the notebook metadata (not cell metadata):
 
+> **Note:** Local or relative CSS file paths will be automatically embedded as inline styles in the exported HTML, creating self-contained files. Remote URLs (http:// or https://) will remain as external `<link>` tags.
+
 #### Custom Inline Styles
 
 ```json
@@ -172,7 +176,16 @@ Add custom styles and stylesheets that apply to the entire notebook. Add these t
 
 #### External Stylesheets
 
-Single stylesheet:
+Single stylesheet (local file):
+```json
+{
+  "metadata": {
+    "stylesheet": "custom-theme.css"
+  }
+}
+```
+
+Single stylesheet (remote URL):
 ```json
 {
   "metadata": {
@@ -181,11 +194,12 @@ Single stylesheet:
 }
 ```
 
-Multiple stylesheets:
+Multiple stylesheets (mixed local and remote):
 ```json
 {
   "metadata": {
     "stylesheet": [
+      "local-styles.css",
       "https://fonts.googleapis.com/css2?family=Roboto&display=swap",
       "https://example.com/custom-theme.css"
     ]
@@ -199,7 +213,7 @@ Multiple stylesheets:
 {
   "metadata": {
     "style": "body { max-width: 1200px; margin: 0 auto; }",
-    "stylesheet": ["https://fonts.googleapis.com/css2?family=Inter&display=swap"]
+    "stylesheet": ["local-theme.css", "https://fonts.googleapis.com/css2?family=Inter&display=swap"]
   }
 }
 ```
