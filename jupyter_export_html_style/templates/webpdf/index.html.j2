@@ -1,0 +1,32 @@
+{%- extends 'lab/index.html.j2' -%}
+
+{#
+  Main entry point for the styled WebPDF export.
+  This extends the lab index template and adds custom style injection.
+  The webpdf template uses the lab template as a base for consistency with
+  the styled HTML exporter, ensuring cell IDs and CSS rules match.
+#}
+
+{% block html_head_css %}
+{{ super() }}
+{#- Inject custom cell styles if present -#}
+{%- if resources.styles -%}
+<style>
+/* Custom cell styles */
+{%- for cell_id, style in resources.styles.items() %}
+  {%- if style is mapping -%}
+    {%- set style_str = [] -%}
+    {%- for k, v in style.items() -%}
+      {%- set _ = style_str.append(k ~ ': ' ~ v) -%}
+    {%- endfor -%}
+#{{ cell_id }} { {{ style_str | join('; ') }} }
+  {%- elif style is string -%}
+#{{ cell_id }} { {{ style }} }
+  {%- endif -%}
+{%- endfor -%}
+</style>
+{%- endif -%}
+
+{#- Notebook-level styles and stylesheets are handled by post-processing in exporter.py
+     This allows local/relative stylesheets to be embedded as inline styles -#}
+{% endblock html_head_css %}
