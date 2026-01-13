@@ -14,6 +14,7 @@ A JupyterLab extension and nbconvert preprocessor/exporter that allows custom ce
 - 🎯 **Input/Output Styling**: Separate styles for cell inputs and outputs
 - 📝 **Notebook-Level Styling**: Add custom styles and stylesheets to the entire notebook
 - 📦 **Resource Embedding**: Automatically embeds local CSS files as inline styles for self-contained HTML
+- 🖼️ **Image Embedding**: Embeds images as base64 data URIs for self-contained HTML exports
 - 🔧 **nbconvert Integration**: Seamlessly integrates with nbconvert's export pipeline
 - 📄 **PDF Export with Styles**: Export to PDF via HTML with all custom styles applied
 - 🚀 **Easy to Use**: Simple metadata-based configuration
