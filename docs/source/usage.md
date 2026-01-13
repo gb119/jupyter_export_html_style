@@ -39,7 +39,9 @@ display(Javascript('''
 
 ## Exporting with Custom Styles
 
-### Command Line
+### HTML Export
+
+#### Command Line
 
 Use the `styled_html` exporter with nbconvert:
 
@@ -55,7 +57,7 @@ jupyter nbconvert --to styled_html \
     notebook.ipynb
 ```
 
-### Python API
+#### Python API
 
 ```python
 from jupyter_export_html_style import StyledHTMLExporter
@@ -74,6 +76,85 @@ with open('notebook.ipynb', 'r') as f:
 with open('output.html', 'w') as f:
     f.write(body)
 ```
+
+### PDF Export (with Styles)
+
+The `styled_webpdf` exporter allows you to export notebooks to PDF via HTML while preserving all custom cell styles, embedded images, and styling information.
+
+#### Prerequisites
+
+PDF export requires [Playwright](https://playwright.dev/) and Chromium:
+
+```bash
+# Install nbconvert with webpdf support
+pip install nbconvert[webpdf]
+
+# Install Chromium browser
+playwright install chromium
+```
+
+#### Command Line
+
+Use the `styled_webpdf` exporter with nbconvert:
+
+```bash
+jupyter nbconvert --to styled_webpdf notebook.ipynb
+```
+
+With custom configuration:
+
+```bash
+jupyter nbconvert --to styled_webpdf \
+    --StyledWebPDFExporter.paginate=False \
+    --StyledWebPDFExporter.allow_chromium_download=True \
+    notebook.ipynb
+```
+
+#### Python API
+
+```python
+from jupyter_export_html_style import StyledWebPDFExporter
+
+# Create exporter
+exporter = StyledWebPDFExporter()
+
+# Export notebook to PDF
+(pdf_data, resources) = exporter.from_filename('notebook.ipynb')
+
+# Save output
+with open('output.pdf', 'wb') as f:
+    f.write(pdf_data)
+```
+
+#### PDF Export Options
+
+The `StyledWebPDFExporter` supports several configuration options:
+
+- **`paginate`** (default: `True`): Split the notebook into multiple pages. Set to `False` for a single long page.
+- **`allow_chromium_download`** (default: `False`): Allow automatic download of Chromium if not found.
+- **`disable_sandbox`** (default: `False`): Disable Chromium sandbox (required in some container environments).
+
+Example with options:
+
+```python
+exporter = StyledWebPDFExporter(
+    paginate=False,  # Single long page
+    allow_chromium_download=True,  # Auto-download Chromium
+    disable_sandbox=False  # Keep sandbox enabled
+)
+```
+
+#### Container Environments
+
+When running in containers (Docker, Kubernetes, etc.), you may need to disable the Chromium sandbox:
+
+```bash
+jupyter nbconvert --to styled_webpdf \
+    --StyledWebPDFExporter.disable_sandbox=True \
+    notebook.ipynb
+```
+
+**Warning**: Disabling the sandbox reduces security and should only be done in trusted environments.
 
 ## Configuration
 
