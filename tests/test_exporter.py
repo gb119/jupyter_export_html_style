@@ -18,6 +18,7 @@ Note on Implementation:
     elements don't currently have the matching IDs.
 """
 
+import base64
 import os
 import re
 import tempfile
@@ -506,8 +507,6 @@ def test_embed_attachment_in_html_img_tag():
     This test verifies the fix for the issue where <img src="attachment:...">
     tags in markdown cells were not being embedded even when embed_images=True.
     """
-    import base64
-
     # Create a notebook with markdown cell containing HTML img tag with attachment
     nb = new_notebook()
     md_cell = new_markdown_cell('Test image: <img src="attachment:test.png" />')
@@ -552,8 +551,6 @@ def test_attachment_in_html_img_tag_disabled():
     in HTML img tags (not markdown syntax), they remain as attachment URLs
     because the HTML embedding patch only runs when embed_images=True.
     """
-    import base64
-
     # Create a notebook with markdown cell containing HTML img tag with attachment
     nb = new_notebook()
     md_cell = new_markdown_cell('Test image: <img src="attachment:test.png" />')
