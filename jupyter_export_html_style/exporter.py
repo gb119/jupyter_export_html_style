@@ -242,13 +242,19 @@ class StyledHTMLExporter(HTMLExporter):
                         base_path_abs = os.path.abspath(base_path)
 
                         # Security check: ensure the resolved path is within base_path
-                        if (
-                            not file_path.startswith(base_path_abs + os.sep)
-                            and file_path != base_path_abs
-                        ):
-                            # Path traversal attempt detected, fallback to link tag
+                        # Use os.path.commonpath for robust cross-platform validation
+                        try:
+                            common = os.path.commonpath([base_path_abs, file_path])
+                            if common != base_path_abs:
+                                # Path traversal attempt detected, fallback to link tag
+                                blocks.append(f'\n<link rel="stylesheet" href="{ss}">\n')
+                                continue
+                        except ValueError:
+                            # Different drives on Windows, definitely outside base path
                             blocks.append(f'\n<link rel="stylesheet" href="{ss}">\n')
-                        elif os.path.isfile(file_path):
+                            continue
+
+                        if os.path.isfile(file_path):
                             with open(file_path, encoding="utf-8") as f:
                                 css_content = f.read()
                                 blocks.append(
