@@ -443,6 +443,156 @@ def test_generate_notebook_style_block_empty():
     assert style_block == ""
 
 
+def test_embed_local_css_file():
+    """Test that local CSS files are embedded as inline styles."""
+    with tempfile.TemporaryDirectory() as tmpdir:
+        # Create a test CSS file
+        css_content = "body { background-color: #f0f0f0; }\n.custom { color: red; }"
+        css_path = os.path.join(tmpdir, "custom.css")
+        with open(css_path, "w", encoding="utf-8") as f:
+            f.write(css_content)
+
+        # Create resources with the base path
+        resources = {"metadata": {"path": tmpdir}}
+
+        exporter = StyledHTMLExporter()
+        notebook_styles = {"stylesheet": "custom.css"}
+        style_block = exporter._generate_notebook_style_block(notebook_styles, resources)
+
+        # Verify the CSS is embedded as a style tag, not a link tag
+        assert "<style>" in style_block, "CSS should be embedded as style tag"
+        assert "Embedded stylesheet: custom.css" in style_block
+        assert "body { background-color: #f0f0f0; }" in style_block
+        assert ".custom { color: red; }" in style_block
+
+        # Verify it's NOT a link tag
+        assert '<link rel="stylesheet"' not in style_block
+
+
+def test_embed_multiple_local_css_files():
+    """Test that multiple local CSS files are embedded as inline styles."""
+    with tempfile.TemporaryDirectory() as tmpdir:
+        # Create two test CSS files
+        css1_content = "body { margin: 0; }"
+        css1_path = os.path.join(tmpdir, "style1.css")
+        with open(css1_path, "w", encoding="utf-8") as f:
+            f.write(css1_content)
+
+        css2_content = ".header { padding: 10px; }"
+        css2_path = os.path.join(tmpdir, "style2.css")
+        with open(css2_path, "w", encoding="utf-8") as f:
+            f.write(css2_content)
+
+        # Create resources with the base path
+        resources = {"metadata": {"path": tmpdir}}
+
+        exporter = StyledHTMLExporter()
+        notebook_styles = {"stylesheet": ["style1.css", "style2.css"]}
+        style_block = exporter._generate_notebook_style_block(notebook_styles, resources)
+
+        # Verify both CSS files are embedded
+        assert style_block.count("<style>") == 2, "Should have two style tags"
+        assert "body { margin: 0; }" in style_block
+        assert ".header { padding: 10px; }" in style_block
+        assert "Embedded stylesheet: style1.css" in style_block
+        assert "Embedded stylesheet: style2.css" in style_block
+
+
+def test_remote_css_remains_as_link():
+    """Test that remote CSS URLs remain as link tags (not embedded)."""
+    exporter = StyledHTMLExporter()
+    resources = {"metadata": {"path": "."}}
+
+    notebook_styles = {
+        "stylesheet": ["https://example.com/style.css", "http://cdn.example.com/theme.css"]
+    }
+    style_block = exporter._generate_notebook_style_block(notebook_styles, resources)
+
+    # Parse HTML to find link tags
+    soup = _parse_html(style_block)
+    link_tags = soup.find_all("link", rel="stylesheet")
+
+    assert len(link_tags) == 2, "Should have two link tags for remote URLs"
+    assert link_tags[0].get("href") == "https://example.com/style.css"
+    assert link_tags[1].get("href") == "http://cdn.example.com/theme.css"
+
+    # Verify they are NOT embedded as style tags
+    assert "Embedded stylesheet:" not in style_block
+
+
+def test_mixed_local_and_remote_css():
+    """Test mixing local CSS files (embedded) and remote URLs (linked)."""
+    with tempfile.TemporaryDirectory() as tmpdir:
+        # Create a local CSS file
+        css_content = ".local-style { color: blue; }"
+        css_path = os.path.join(tmpdir, "local.css")
+        with open(css_path, "w", encoding="utf-8") as f:
+            f.write(css_content)
+
+        # Create resources with the base path
+        resources = {"metadata": {"path": tmpdir}}
+
+        exporter = StyledHTMLExporter()
+        notebook_styles = {
+            "stylesheet": ["local.css", "https://example.com/remote.css"]
+        }
+        style_block = exporter._generate_notebook_style_block(notebook_styles, resources)
+
+        # Verify local CSS is embedded
+        assert ".local-style { color: blue; }" in style_block
+        assert "Embedded stylesheet: local.css" in style_block
+
+        # Verify remote CSS is linked
+        soup = _parse_html(style_block)
+        link_tags = soup.find_all("link", rel="stylesheet")
+        assert len(link_tags) == 1, "Should have one link tag for remote URL"
+        assert link_tags[0].get("href") == "https://example.com/remote.css"
+
+
+def test_nonexistent_local_css_fallback_to_link():
+    """Test that non-existent local CSS files fallback to link tags."""
+    resources = {"metadata": {"path": "/tmp"}}
+
+    exporter = StyledHTMLExporter()
+    notebook_styles = {"stylesheet": "nonexistent.css"}
+    style_block = exporter._generate_notebook_style_block(notebook_styles, resources)
+
+    # Should fallback to link tag since file doesn't exist
+    soup = _parse_html(style_block)
+    link_tags = soup.find_all("link", rel="stylesheet")
+    assert len(link_tags) == 1, "Should have link tag as fallback"
+    assert link_tags[0].get("href") == "nonexistent.css"
+
+
+def test_embed_local_css_in_notebook_export():
+    """Test end-to-end: local CSS file is embedded when exporting a notebook."""
+    with tempfile.TemporaryDirectory() as tmpdir:
+        # Create a test CSS file
+        css_content = ".notebook-custom { font-size: 16px; }"
+        css_path = os.path.join(tmpdir, "notebook.css")
+        with open(css_path, "w", encoding="utf-8") as f:
+            f.write(css_content)
+
+        # Create a simple notebook with stylesheet metadata
+        nb = new_notebook(cells=[new_code_cell("x = 1")])
+        nb.metadata["stylesheet"] = "notebook.css"
+
+        # Write notebook to file
+        nb_path = os.path.join(tmpdir, "test.ipynb")
+        with open(nb_path, "w") as f:
+            nbf.write(nb, f)
+
+        # Export notebook
+        exporter = StyledHTMLExporter()
+        output, resources = exporter.from_filename(nb_path)
+
+        # Verify CSS is embedded in the output
+        assert ".notebook-custom { font-size: 16px; }" in output
+        assert "Embedded stylesheet: notebook.css" in output
+        # Verify it's not a link tag
+        assert 'href="notebook.css"' not in output
+
+
 def test_embed_images_enabled_by_default():
     """Test that embed_images is enabled by default."""
     exporter = StyledHTMLExporter()

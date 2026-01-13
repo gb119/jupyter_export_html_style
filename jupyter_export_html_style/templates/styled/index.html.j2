@@ -25,22 +25,6 @@
 </style>
 {%- endif -%}
 
-{#- Inject notebook-level styles if present -#}
-{%- if resources.notebook_styles -%}
-  {%- if resources.notebook_styles.stylesheet -%}
-    {%- if resources.notebook_styles.stylesheet is string -%}
-<link rel="stylesheet" href="{{ resources.notebook_styles.stylesheet }}">
-    {%- elif resources.notebook_styles.stylesheet is iterable -%}
-      {%- for ss in resources.notebook_styles.stylesheet -%}
-<link rel="stylesheet" href="{{ ss }}">
-      {%- endfor -%}
-    {%- endif -%}
-  {%- endif -%}
-  {%- if resources.notebook_styles.style -%}
-<style>
-/* Custom notebook styles */
-{{ resources.notebook_styles.style }}
-</style>
-  {%- endif -%}
-{%- endif -%}
+{#- Notebook-level styles and stylesheets are handled by post-processing in exporter.py
+     This allows local/relative stylesheets to be embedded as inline styles -#}
 {% endblock html_head_css %}

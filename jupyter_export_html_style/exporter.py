@@ -140,7 +140,9 @@ class StyledHTMLExporter(HTMLExporter):
 
         # Add notebook-level styles and stylesheets
         if resources and "notebook_styles" in resources:
-            notebook_style_block = self._generate_notebook_style_block(resources["notebook_styles"])
+            notebook_style_block = self._generate_notebook_style_block(
+                resources["notebook_styles"], resources
+            )
             if notebook_style_block:
                 style_blocks.append(notebook_style_block)
 
@@ -182,18 +184,30 @@ class StyledHTMLExporter(HTMLExporter):
             return "\n<style>\n/* Custom cell styles */\n" + "\n".join(css_rules) + "\n</style>\n"
         return ""
 
-    def _generate_notebook_style_block(self, notebook_styles):
+    def _generate_notebook_style_block(self, notebook_styles, resources=None):
         """Generate style and stylesheet blocks from notebook-level metadata.
+
+        Local or relative stylesheet paths are embedded as inline <style> tags,
+        while remote URLs (http/https) remain as <link> tags.
 
         Args:
             notebook_styles (dict): Dictionary containing 'style' and/or
                 'stylesheet' keys. The 'style' key should contain inline CSS
                 as a string. The 'stylesheet' key can be either a string URL
-                or a list of string URLs to external stylesheets.
+                or a list of string URLs to external or local stylesheets.
+            resources (dict, optional): Resources dictionary containing metadata
+                such as the base path for resolving relative file paths.
+                Defaults to None.
 
         Returns:
             (str): HTML containing <style> and/or <link> elements. Returns empty
                 string if no notebook styles are provided.
+
+        Notes:
+            Local stylesheet files (not starting with http:// or https://) are
+            read and embedded as inline styles. Remote stylesheets remain as
+            link tags. If a local file cannot be read, it falls back to a
+            link tag.
 
         Examples:
             >>> exporter = StyledHTMLExporter()
@@ -205,15 +219,37 @@ class StyledHTMLExporter(HTMLExporter):
         """
         blocks = []
 
+        # Get the base path from resources if available
+        base_path = "."
+        if resources:
+            base_path = resources.get("metadata", {}).get("path", ".")
+
         # Add custom stylesheet link if provided
         if "stylesheet" in notebook_styles:
             stylesheet = notebook_styles["stylesheet"]
-            if isinstance(stylesheet, str):
-                blocks.append(f'\n<link rel="stylesheet" href="{stylesheet}">\n')
-            elif isinstance(stylesheet, list):
-                # Support multiple stylesheets
-                for ss in stylesheet:
+            stylesheets = [stylesheet] if isinstance(stylesheet, str) else stylesheet
+
+            for ss in stylesheets:
+                # Check if this is a local/relative file or a remote URL
+                if ss.startswith(("http://", "https://")):
+                    # Remote URL - keep as link tag
                     blocks.append(f'\n<link rel="stylesheet" href="{ss}">\n')
+                else:
+                    # Local/relative path - try to embed
+                    try:
+                        file_path = os.path.join(base_path, ss)
+                        if os.path.isfile(file_path):
+                            with open(file_path, "r", encoding="utf-8") as f:
+                                css_content = f.read()
+                                blocks.append(
+                                    f"\n<style>\n/* Embedded stylesheet: {ss} */\n{css_content}\n</style>\n"
+                                )
+                        else:
+                            # File doesn't exist, fallback to link tag
+                            blocks.append(f'\n<link rel="stylesheet" href="{ss}">\n')
+                    except Exception:
+                        # If embedding fails, fallback to link tag
+                        blocks.append(f'\n<link rel="stylesheet" href="{ss}">\n')
 
         # Add custom inline styles if provided
         if "style" in notebook_styles:
