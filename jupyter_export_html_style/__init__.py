@@ -11,7 +11,7 @@ This package provides:
 - Integration with JupyterLab for enhanced HTML export
 """
 
-__version__ = "0.0.2rc2"
+__version__ = "0.0.2rc3"
 
 from .exporter import StyledHTMLExporter
 from .preprocessor import StylePreprocessor
