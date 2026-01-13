@@ -549,7 +549,7 @@ def test_mixed_local_and_remote_css():
 
 def test_nonexistent_local_css_fallback_to_link():
     """Test that non-existent local CSS files fallback to link tags."""
-    resources = {"metadata": {"path": "/tmp"}}
+    resources = {"metadata": {"path": tempfile.gettempdir()}}
 
     exporter = StyledHTMLExporter()
     notebook_styles = {"stylesheet": "nonexistent.css"}
@@ -589,6 +589,35 @@ def test_embed_local_css_in_notebook_export():
         assert "Embedded stylesheet: notebook.css" in output
         # Verify it's not a link tag
         assert 'href="notebook.css"' not in output
+
+
+def test_path_traversal_protection():
+    """Test that path traversal attacks are prevented."""
+    with tempfile.TemporaryDirectory() as tmpdir:
+        # Create a CSS file outside the base directory
+        parent_dir = os.path.dirname(tmpdir)
+        malicious_css_path = os.path.join(parent_dir, "malicious.css")
+        with open(malicious_css_path, "w", encoding="utf-8") as f:
+            f.write("body { malicious: content; }")
+
+        # Try to access the file using path traversal
+        resources = {"metadata": {"path": tmpdir}}
+
+        exporter = StyledHTMLExporter()
+        notebook_styles = {"stylesheet": "../malicious.css"}
+        style_block = exporter._generate_notebook_style_block(notebook_styles, resources)
+
+        # Should fallback to link tag (not embed the file)
+        soup = _parse_html(style_block)
+        link_tags = soup.find_all("link", rel="stylesheet")
+        assert len(link_tags) == 1, "Should have link tag as fallback"
+        assert link_tags[0].get("href") == "../malicious.css"
+
+        # Verify the malicious content is NOT embedded
+        assert "malicious: content" not in style_block
+
+        # Clean up
+        os.remove(malicious_css_path)
 
 
 def test_embed_images_enabled_by_default():

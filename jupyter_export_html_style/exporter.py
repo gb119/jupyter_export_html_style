@@ -237,8 +237,18 @@ class StyledHTMLExporter(HTMLExporter):
                 else:
                     # Local/relative path - try to embed
                     try:
-                        file_path = os.path.join(base_path, ss)
-                        if os.path.isfile(file_path):
+                        # Resolve the full path and validate it stays within base_path
+                        file_path = os.path.abspath(os.path.join(base_path, ss))
+                        base_path_abs = os.path.abspath(base_path)
+
+                        # Security check: ensure the resolved path is within base_path
+                        if (
+                            not file_path.startswith(base_path_abs + os.sep)
+                            and file_path != base_path_abs
+                        ):
+                            # Path traversal attempt detected, fallback to link tag
+                            blocks.append(f'\n<link rel="stylesheet" href="{ss}">\n')
+                        elif os.path.isfile(file_path):
                             with open(file_path, encoding="utf-8") as f:
                                 css_content = f.read()
                                 blocks.append(
@@ -247,8 +257,8 @@ class StyledHTMLExporter(HTMLExporter):
                         else:
                             # File doesn't exist, fallback to link tag
                             blocks.append(f'\n<link rel="stylesheet" href="{ss}">\n')
-                    except Exception:
-                        # If embedding fails, fallback to link tag
+                    except (OSError, UnicodeDecodeError, PermissionError):
+                        # If embedding fails due to file access issues, fallback to link tag
                         blocks.append(f'\n<link rel="stylesheet" href="{ss}">\n')
 
         # Add custom inline styles if provided
