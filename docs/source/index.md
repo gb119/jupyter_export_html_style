@@ -4,14 +4,22 @@ Welcome to the documentation for Jupyter Export HTML Style!
 
 ## Overview
 
-Jupyter Export HTML Style is a JupyterLab extension and nbconvert preprocessor/exporter that enables custom cell-level styling when exporting notebooks to HTML. This allows you to override default styles using cell metadata.
+A JupyterLab extension and nbconvert preprocessor/exporter that allows custom cell-level styling when exporting notebooks to HTML, Slides and PDF.
+
+This extension was written to help with using Jupyterlab for authoring teaching materials. The motivation was dealing with cases where you need to have some initialisation code (for example to apply custom css to the notebook's IPython rendering) but do not want those code cells to be visible in exported slides, html or pdf versions. With this extension you can tweak the css in the exported notebook from within the notebook environment. Similarly, it embeds images and local stylesheets into the exported html so that they can be pasted directly into virtual learning environments. The Blackboard Ultra VLE in particular does not like internal anchor links in its html, so there is a notebook level control of whether these should be excluded.
 
 ## Features
 
-- **Custom Cell Styling**: Apply custom CSS styles to individual cells via metadata
-- **nbconvert Integration**: Works seamlessly with nbconvert's export pipeline
-- **JupyterLab Extension**: Integrated into JupyterLab for easy access
-- **Flexible Configuration**: Configure style metadata keys and behavior
+- 🎨 **Custom Cell Styling**: Apply CSS styles to individual cells via metadata
+- 🎯 **Input/Output Styling**: Separate styles for cell inputs and outputs
+- 🏷️ **Custom CSS Classes**: Add custom CSS classes to cells, inputs, and outputs for use with external stylesheets
+- 📝 **Notebook-Level Styling**: Add custom styles and stylesheets to the entire notebook
+- 📦 **Resource Embedding**: Automatically embeds local CSS files as inline styles for self-contained HTML
+- 🖼️ **Image Embedding**: Embeds images as base64 data URIs for self-contained HTML exports
+- 🔧 **nbconvert Integration**: Seamlessly integrates with nbconvert's export pipeline
+- 📄 **PDF Export with Styles**: Export to PDF via HTML with all custom styles applied
+- 🎭 **Reveal.js Slides with Styles**: Create presentation slides with custom cell styling
+- 🚀 **Easy to Use**: Simple metadata-based configuration
 
 ## Contents
 
