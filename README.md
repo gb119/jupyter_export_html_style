@@ -155,6 +155,18 @@ In JupyterLab, the exporters are available in the **File → Save and Export Not
 
 These menu entries correspond to the `styled_html`, `styled_webpdf`, and `styled_slides` exporters used in the command line examples above.
 
+## Visual Examples
+
+Want to see what the styling looks like? Check out our [Visual Examples Gallery](https://gb119.github.io/jupyter_export_html_style/usage.html#visual-examples-gallery) in the documentation, which includes screenshots and live examples of:
+
+- 🎨 **Cell-level styling** with highlights, borders, and gradients
+- 📥📤 **Input/output styling** with separate colors and themes
+- 🏷️ **Custom CSS classes** using external stylesheets
+- 📝 **Notebook-level styling** for consistent, professional documents
+- ✨ **Comprehensive demos** combining multiple techniques
+
+All example notebooks and their exported HTML files are available in the [examples directory](docs/source/examples/).
+
 ## Usage Examples
 
 ### Cell-Level Styling
