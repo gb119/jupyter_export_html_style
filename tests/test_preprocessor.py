@@ -188,3 +188,96 @@ def test_preprocess_notebook_with_multiple_stylesheets():
     assert "notebook_styles" in resources
     assert "stylesheet" in resources["notebook_styles"]
     assert len(resources["notebook_styles"]["stylesheet"]) == 2
+
+
+def test_preprocess_cell_with_class_metadata():
+    """Test preprocessing a cell with custom class metadata."""
+    preprocessor = StylePreprocessor()
+
+    cell = new_code_cell("x = 1")
+    cell.metadata["class"] = "my-custom-class"
+
+    processed_cell, resources = preprocessor.preprocess_cell(cell, {"styles": {}}, 0)
+
+    assert "cell_class" in processed_cell.metadata
+    assert processed_cell.metadata["cell_class"] == "my-custom-class"
+
+
+def test_preprocess_cell_with_input_class():
+    """Test preprocessing a cell with input-class metadata."""
+    preprocessor = StylePreprocessor()
+
+    cell = new_code_cell("x = 1")
+    cell.metadata["input-class"] = "custom-input-class"
+
+    processed_cell, resources = preprocessor.preprocess_cell(cell, {"styles": {}}, 0)
+
+    assert "input_cell_class" in processed_cell.metadata
+    assert processed_cell.metadata["input_cell_class"] == "custom-input-class"
+
+
+def test_preprocess_cell_with_output_class():
+    """Test preprocessing a cell with output-class metadata."""
+    preprocessor = StylePreprocessor()
+
+    cell = new_code_cell("print('test')")
+    cell.metadata["output-class"] = "custom-output-class"
+
+    processed_cell, resources = preprocessor.preprocess_cell(cell, {"styles": {}}, 0)
+
+    assert "output_cell_class" in processed_cell.metadata
+    assert processed_cell.metadata["output_cell_class"] == "custom-output-class"
+
+
+def test_preprocess_cell_with_all_classes():
+    """Test preprocessing a cell with cell, input, and output class metadata."""
+    preprocessor = StylePreprocessor()
+
+    cell = new_code_cell("x = 42")
+    cell.metadata["class"] = "custom-cell"
+    cell.metadata["input-class"] = "custom-input"
+    cell.metadata["output-class"] = "custom-output"
+
+    processed_cell, resources = preprocessor.preprocess_cell(cell, {"styles": {}}, 1)
+
+    assert "cell_class" in processed_cell.metadata
+    assert processed_cell.metadata["cell_class"] == "custom-cell"
+    assert "input_cell_class" in processed_cell.metadata
+    assert processed_cell.metadata["input_cell_class"] == "custom-input"
+    assert "output_cell_class" in processed_cell.metadata
+    assert processed_cell.metadata["output_cell_class"] == "custom-output"
+
+
+def test_preprocess_cell_with_multiple_classes():
+    """Test preprocessing a cell with multiple CSS classes."""
+    preprocessor = StylePreprocessor()
+
+    cell = new_code_cell("y = 2")
+    cell.metadata["class"] = "class1 class2 class3"
+
+    processed_cell, resources = preprocessor.preprocess_cell(cell, {"styles": {}}, 0)
+
+    assert "cell_class" in processed_cell.metadata
+    assert processed_cell.metadata["cell_class"] == "class1 class2 class3"
+
+
+def test_preprocess_cell_with_classes_and_styles():
+    """Test preprocessing a cell with both classes and styles."""
+    preprocessor = StylePreprocessor()
+
+    cell = new_code_cell("z = 3")
+    cell.metadata["class"] = "highlight"
+    cell.metadata["style"] = {"background-color": "#ffff00"}
+    cell.metadata["input-class"] = "code-highlight"
+    cell.metadata["input-style"] = {"border": "2px solid red"}
+
+    processed_cell, resources = preprocessor.preprocess_cell(cell, {"styles": {}}, 0)
+
+    assert "cell_class" in processed_cell.metadata
+    assert processed_cell.metadata["cell_class"] == "highlight"
+    assert "cell_style" in processed_cell.metadata
+    assert processed_cell.metadata["cell_style"]["background-color"] == "#ffff00"
+    assert "input_cell_class" in processed_cell.metadata
+    assert processed_cell.metadata["input_cell_class"] == "code-highlight"
+    assert "input_cell_style" in processed_cell.metadata
+    assert "cell-0-input" in resources["styles"]

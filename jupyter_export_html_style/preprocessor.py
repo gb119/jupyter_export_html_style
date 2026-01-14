@@ -11,17 +11,21 @@ class StylePreprocessor(Preprocessor):
 
     This preprocessor looks for style-related metadata in cells and prepares
     them for use in HTML export. It processes cell-level styles (general, input-
-    specific, and output-specific) as well as notebook-level styles.
+    specific, and output-specific), custom CSS classes, as well as notebook-level
+    styles.
 
     Attributes:
         style_metadata_key (Unicode): The metadata key to look for cell styles.
             Defaults to "style". Can be configured via traitlets config system.
 
     Notes:
-        The preprocessor collects styles from four sources:
+        The preprocessor collects styles and classes from multiple sources:
         - Cell-level 'style' metadata: Applied to the entire cell container
         - Cell-level 'input-style' metadata: Applied to the input area
         - Cell-level 'output-style' metadata: Applied to the output area
+        - Cell-level 'class' metadata: Custom CSS classes added to the cell div
+        - Cell-level 'input-class' metadata: Custom CSS classes added to the input area
+        - Cell-level 'output-class' metadata: Custom CSS classes added to the output area
         - Notebook-level 'style' and 'stylesheet' metadata: Applied globally
 
     Examples:
@@ -78,7 +82,8 @@ class StylePreprocessor(Preprocessor):
             (tuple): A tuple containing:
                 - cell (NotebookNode): The processed cell with style metadata
                     stored in cell_style, input_cell_style, and output_cell_style
-                    attributes.
+                    attributes, and custom CSS classes in cell_class,
+                    input_cell_class, and output_cell_class attributes.
                 - resources (dict): Updated resources with collected cell styles
                     indexed by cell-{index}, cell-{index}-input, and
                     cell-{index}-output keys.
@@ -112,5 +117,20 @@ class StylePreprocessor(Preprocessor):
             # Collect in resources for CSS generation
             output_id = f"{cell_id}-output"
             resources["styles"][output_id] = output_style
+
+        # Check for custom class metadata
+        if "metadata" in cell and "class" in cell.metadata:
+            custom_class = cell.metadata["class"]
+            cell.metadata["cell_class"] = custom_class
+
+        # Check for input-class metadata
+        if "metadata" in cell and "input-class" in cell.metadata:
+            input_class = cell.metadata["input-class"]
+            cell.metadata["input_cell_class"] = input_class
+
+        # Check for output-class metadata
+        if "metadata" in cell and "output-class" in cell.metadata:
+            output_class = cell.metadata["output-class"]
+            cell.metadata["output_cell_class"] = output_class
 
         return cell, resources

@@ -17,21 +17,24 @@
 {%- endif -%}
 {#- Generate cell index for styling -#}
 {%- set cell_index = loop.index0 -%}
-<div {{ cell_id_anchor(cell) }} class="jp-Cell jp-CodeCell jp-Notebook-cell {{ no_output_class }} {{ no_input_class }} {{ celltags(cell) }}" data-cell-index="{{ cell_index }}">
+{%- set custom_class = cell.metadata.get('cell_class', '') -%}
+<div {{ cell_id_anchor(cell) }} class="jp-Cell jp-CodeCell jp-Notebook-cell {{ no_output_class }} {{ no_input_class }} {{ celltags(cell) }} {{ custom_class }}" data-cell-index="{{ cell_index }}">
 {{ super() }}
 </div>
 {%- endblock codecell -%}
 
 {%- block markdowncell scoped -%}
 {%- set cell_index = loop.index0 -%}
-<div {{ cell_id_anchor(cell) }} class="jp-Cell jp-MarkdownCell jp-Notebook-cell {{ celltags(cell) }}" data-cell-index="{{ cell_index }}">
+{%- set custom_class = cell.metadata.get('cell_class', '') -%}
+<div {{ cell_id_anchor(cell) }} class="jp-Cell jp-MarkdownCell jp-Notebook-cell {{ celltags(cell) }} {{ custom_class }}" data-cell-index="{{ cell_index }}">
 {{ super() }}
 </div>
 {%- endblock markdowncell -%}
 
 {%- block rawcell scoped -%}
 {%- set cell_index = loop.index0 -%}
-<div {{ cell_id_anchor(cell) }} class="jp-Cell jp-RawCell jp-Notebook-cell {{ celltags(cell) }}" data-cell-index="{{ cell_index }}">
+{%- set custom_class = cell.metadata.get('cell_class', '') -%}
+<div {{ cell_id_anchor(cell) }} class="jp-Cell jp-RawCell jp-Notebook-cell {{ celltags(cell) }} {{ custom_class }}" data-cell-index="{{ cell_index }}">
 {{ super() }}
 </div>
 {%- endblock rawcell -%}

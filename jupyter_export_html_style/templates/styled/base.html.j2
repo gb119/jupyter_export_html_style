@@ -13,13 +13,15 @@
 {%- if not resources.global_content_filter.include_input -%}
 {%- set no_input_class="jp-mod-noInput" -%}
 {%- endif -%}
-<div {{ cell_id_anchor(cell) }} id="cell-{{ loop.index0 }}" class="jp-Cell jp-CodeCell jp-Notebook-cell {{ no_output_class }} {{ no_input_class }} {{ celltags(cell) }}">
+{%- set custom_class = cell.metadata.get('cell_class', '') -%}
+<div {{ cell_id_anchor(cell) }} id="cell-{{ loop.index0 }}" class="jp-Cell jp-CodeCell jp-Notebook-cell {{ no_output_class }} {{ no_input_class }} {{ celltags(cell) }} {{ custom_class }}">
 {{ super() }}
 </div>
 {%- endblock codecell %}
 
 {% block input_group -%}
-<div class="jp-Cell-inputWrapper" id="cell-{{ loop.index0 }}-input">
+{%- set input_custom_class = cell.metadata.get('input_cell_class', '') -%}
+<div class="jp-Cell-inputWrapper {{ input_custom_class }}" id="cell-{{ loop.index0 }}-input">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
@@ -29,7 +31,8 @@
 {% endblock input_group %}
 
 {% block output_group %}
-<div class="jp-Cell-outputWrapper" id="cell-{{ loop.index0 }}-output">
+{%- set output_custom_class = cell.metadata.get('output_cell_class', '') -%}
+<div class="jp-Cell-outputWrapper {{ output_custom_class }}" id="cell-{{ loop.index0 }}-output">
 <div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
 </div>
 {{ super() }}
@@ -37,7 +40,8 @@
 {% endblock output_group %}
 
 {% block markdowncell scoped %}
-<div {{ cell_id_anchor(cell) }} id="cell-{{ loop.index0 }}" class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+{%- set custom_class = cell.metadata.get('cell_class', '') -%}
+<div {{ cell_id_anchor(cell) }} id="cell-{{ loop.index0 }}" class="jp-Cell jp-MarkdownCell jp-Notebook-cell {{ custom_class }}">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -51,7 +55,8 @@
 {%- endblock markdowncell %}
 
 {% block rawcell scoped %}
-<div {{ cell_id_anchor(cell) }} id="cell-{{ loop.index0 }}" class="jp-Cell jp-RawCell jp-Notebook-cell">
+{%- set custom_class = cell.metadata.get('cell_class', '') -%}
+<div {{ cell_id_anchor(cell) }} id="cell-{{ loop.index0 }}" class="jp-Cell jp-RawCell jp-Notebook-cell {{ custom_class }}">
 {{ cell.source | wrap_text(80) }}
 </div>
 {%- endblock rawcell %}
