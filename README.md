@@ -12,7 +12,8 @@ A JupyterLab extension and nbconvert preprocessor/exporter that allows custom ce
 This extension was written to help with using Jupyterlab for authoring teaching materials. The motivation was dealing with cases where you need to have
 some initialisation code (for example to aplly custom css to the notebook's IPython rendering) but do not want those code cells to be visible in exported
 slides, html or pdf versions. With this extension you can tweak the css in the exported notebook from within the notebook environment. Similarly, it embeds
-images and local stylesheets into the exported html so that they can be pasted directly into virtual leanring environments.
+images and local stylesheets into the exported html so that they can be pasted directly into virtual leanring environments. The Blackboard Ultra VLE in 
+particular does not like internal anchor links in its html, so there is a notebook level control of whether these should be exlcuded.
 
 ## Features
 
