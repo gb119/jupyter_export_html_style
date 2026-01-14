@@ -7,7 +7,12 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![DOI](https://zenodo.org/badge/1132382644.svg)](https://doi.org/10.5281/zenodo.18231801)
 
-A JupyterLab extension and nbconvert preprocessor/exporter that allows custom cell-level styling when exporting notebooks to HTML and PDF.
+A JupyterLab extension and nbconvert preprocessor/exporter that allows custom cell-level styling when exporting notebooks to HTML, Slides and PDF.
+
+This extension was written to help with using Jupyterlab for authoring teaching materials. The motivation was dealing with cases where you need to have
+some initialisation code (for example to aplly custom css to the notebook's IPython rendering) but do not want those code cells to be visible in exported
+slides, html or pdf versions. With this extension you can tweak the css in the exported notebook from within the notebook environment. Similarly, it embeds
+images and local stylesheets into the exported html so that they can be pasted directly into virtual leanring environments.
 
 ## Features
 
