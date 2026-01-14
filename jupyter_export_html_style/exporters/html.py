@@ -103,6 +103,15 @@ class StyledHTMLExporter(HTMLExporter):
                 - output (str): The HTML output with injected style blocks.
                 - resources (dict): Updated resources dictionary.
         """
+        # Save original exclude_anchor_links setting
+        original_exclude_anchor_links = self.exclude_anchor_links
+
+        # Check notebook metadata for anchor links preference
+        # If metadata.anchors is False, exclude anchor links
+        # Default is to include anchor links (backward compatible)
+        if hasattr(nb, "metadata") and "anchors" in nb.metadata:
+            self.exclude_anchor_links = not nb.metadata["anchors"]
+
         # Save the user's embed_images preference
         should_embed = self.embed_images
 
@@ -116,6 +125,8 @@ class StyledHTMLExporter(HTMLExporter):
         finally:
             # Restore embed_images setting
             self.embed_images = should_embed
+            # Restore original exclude_anchor_links setting
+            self.exclude_anchor_links = original_exclude_anchor_links
 
         # Collect attachments from notebook cells for image embedding
         attachments = {}
