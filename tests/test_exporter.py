@@ -851,3 +851,190 @@ More text outside the div"""
             break
 
     assert found_content, "Content paragraph not found inside the alert div"
+
+
+def test_cell_with_custom_class():
+    """Test that custom class metadata is added to cell div."""
+    exporter = StyledHTMLExporter()
+
+    cell = new_code_cell("x = 1")
+    cell.metadata["class"] = "my-custom-class"
+
+    nb = new_notebook(cells=[cell])
+    output, resources = exporter.from_notebook_node(nb)
+
+    soup = _parse_html(output)
+    # Find the cell div
+    cell_div = soup.find("div", id="cell-0")
+
+    assert cell_div is not None, "Cell div not found"
+    classes = cell_div.get("class", [])
+    assert "my-custom-class" in classes, f"Custom class not found in {classes}"
+
+
+def test_cell_with_multiple_custom_classes():
+    """Test that multiple custom classes can be added to cell div."""
+    exporter = StyledHTMLExporter()
+
+    cell = new_code_cell("y = 2")
+    cell.metadata["class"] = "class1 class2 class3"
+
+    nb = new_notebook(cells=[cell])
+    output, resources = exporter.from_notebook_node(nb)
+
+    soup = _parse_html(output)
+    cell_div = soup.find("div", id="cell-0")
+
+    assert cell_div is not None
+    classes = cell_div.get("class", [])
+    assert "class1" in classes
+    assert "class2" in classes
+    assert "class3" in classes
+
+
+def test_input_with_custom_class():
+    """Test that input-class metadata is added to input wrapper."""
+    exporter = StyledHTMLExporter()
+
+    cell = new_code_cell("z = 3")
+    cell.metadata["input-class"] = "custom-input"
+
+    nb = new_notebook(cells=[cell])
+    output, resources = exporter.from_notebook_node(nb)
+
+    soup = _parse_html(output)
+    # Find the input wrapper div
+    input_wrapper = soup.find("div", id="cell-0-input")
+
+    assert input_wrapper is not None, "Input wrapper not found"
+    classes = input_wrapper.get("class", [])
+    assert "custom-input" in classes, f"Custom input class not found in {classes}"
+
+
+def test_output_with_custom_class():
+    """Test that output-class metadata is added to output wrapper."""
+    exporter = StyledHTMLExporter()
+
+    cell = new_code_cell("print('hello')")
+    # Add an actual output to the cell
+    cell.outputs = [nbf.v4.new_output(output_type="stream", name="stdout", text="hello\n")]
+    cell.metadata["output-class"] = "custom-output"
+
+    nb = new_notebook(cells=[cell])
+    output, resources = exporter.from_notebook_node(nb)
+
+    soup = _parse_html(output)
+    # Find the output wrapper div
+    output_wrapper = soup.find("div", id="cell-0-output")
+
+    assert output_wrapper is not None, "Output wrapper not found"
+    classes = output_wrapper.get("class", [])
+    assert "custom-output" in classes, f"Custom output class not found in {classes}"
+
+
+def test_cell_with_all_custom_classes():
+    """Test cell with custom classes on cell, input, and output."""
+    exporter = StyledHTMLExporter()
+
+    cell = new_code_cell("result = 42")
+    # Add an output to the cell
+    cell.outputs = [nbf.v4.new_output(output_type="execute_result", data={"text/plain": "42"})]
+    cell.metadata["class"] = "highlight-cell"
+    cell.metadata["input-class"] = "highlight-input"
+    cell.metadata["output-class"] = "highlight-output"
+
+    nb = new_notebook(cells=[cell])
+    output, resources = exporter.from_notebook_node(nb)
+
+    soup = _parse_html(output)
+
+    # Check cell classes
+    cell_div = soup.find("div", id="cell-0")
+    assert cell_div is not None
+    cell_classes = cell_div.get("class", [])
+    assert "highlight-cell" in cell_classes
+
+    # Check input classes
+    input_wrapper = soup.find("div", id="cell-0-input")
+    assert input_wrapper is not None
+    input_classes = input_wrapper.get("class", [])
+    assert "highlight-input" in input_classes
+
+    # Check output classes
+    output_wrapper = soup.find("div", id="cell-0-output")
+    assert output_wrapper is not None
+    output_classes = output_wrapper.get("class", [])
+    assert "highlight-output" in output_classes
+
+
+def test_markdown_cell_with_custom_class():
+    """Test that custom class is applied to markdown cells."""
+    exporter = StyledHTMLExporter()
+
+    cell = new_markdown_cell("# Title")
+    cell.metadata["class"] = "markdown-highlight"
+
+    nb = new_notebook(cells=[cell])
+    output, resources = exporter.from_notebook_node(nb)
+
+    soup = _parse_html(output)
+    cell_div = soup.find("div", id="cell-0")
+
+    assert cell_div is not None
+    classes = cell_div.get("class", [])
+    assert "markdown-highlight" in classes
+
+
+def test_custom_classes_with_existing_classes():
+    """Test that custom classes are added alongside existing cell classes."""
+    exporter = StyledHTMLExporter()
+
+    cell = new_code_cell("a = 1")
+    cell.metadata["class"] = "extra-class"
+
+    nb = new_notebook(cells=[cell])
+    output, resources = exporter.from_notebook_node(nb)
+
+    soup = _parse_html(output)
+    cell_div = soup.find("div", id="cell-0")
+
+    assert cell_div is not None
+    classes = cell_div.get("class", [])
+    # Check that both standard and custom classes are present
+    assert "jp-Cell" in classes
+    assert "jp-CodeCell" in classes
+    assert "extra-class" in classes
+
+
+def test_custom_classes_and_styles_together():
+    """Test that custom classes and styles can be used together."""
+    exporter = StyledHTMLExporter()
+
+    cell = new_code_cell("b = 2")
+    cell.metadata["class"] = "styled-cell"
+    cell.metadata["style"] = {"background-color": "#f0f0f0"}
+    cell.metadata["input-class"] = "styled-input"
+    cell.metadata["input-style"] = {"border": "1px solid red"}
+
+    nb = new_notebook(cells=[cell])
+    output, resources = exporter.from_notebook_node(nb)
+
+    soup = _parse_html(output)
+
+    # Check that classes are in the HTML
+    cell_div = soup.find("div", id="cell-0")
+    assert cell_div is not None
+    cell_classes = cell_div.get("class", [])
+    assert "styled-cell" in cell_classes
+
+    input_wrapper = soup.find("div", id="cell-0-input")
+    assert input_wrapper is not None
+    input_classes = input_wrapper.get("class", [])
+    assert "styled-input" in input_classes
+
+    # Check that styles are in the CSS
+    css_rules = _extract_css_rules(output)
+    assert "#cell-0" in css_rules
+    assert "background-color" in css_rules["#cell-0"]
+    assert "#cell-0-input" in css_rules
+    assert "border" in css_rules["#cell-0-input"]
