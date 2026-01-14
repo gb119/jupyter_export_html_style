@@ -91,6 +91,10 @@ class StyledHTMLExporter(HTMLExporter):
     def from_notebook_node(self, nb, resources=None, **kw):
         """Convert a notebook node to HTML with style support.
 
+        This method processes the notebook and applies custom styles, handling
+        both cell-level and notebook-level styling. It also respects the
+        notebook metadata 'anchors' field to control header anchor links.
+
         Args:
             nb (NotebookNode): The notebook to convert.
             resources (dict, optional): Additional resources used in the conversion
@@ -102,6 +106,13 @@ class StyledHTMLExporter(HTMLExporter):
             (tuple): A tuple containing:
                 - output (str): The HTML output with injected style blocks.
                 - resources (dict): Updated resources dictionary.
+
+        Notes:
+            The notebook metadata 'anchors' field controls whether anchor links
+            (¶) are added to headers in markdown cells. If set to False, anchor
+            links are excluded. By default (or if set to True), anchor links are
+            included. This setting is temporary and does not affect subsequent
+            exports with the same exporter instance.
         """
         # Save original exclude_anchor_links setting
         original_exclude_anchor_links = self.exclude_anchor_links
