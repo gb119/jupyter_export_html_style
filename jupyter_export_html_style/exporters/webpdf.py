@@ -138,7 +138,7 @@ class StyledWebPDFExporter(StyledHTMLExporter):
             await page.goto(f"file://{temp_file.name}", wait_until="networkidle")
             await page.wait_for_timeout(100)
 
-            pdf_params = {"print_background": True}
+            pdf_params = {"print_background": True, "tagged": True}
             if not self.paginate:
                 # Floating point precision errors cause the printed
                 # PDF from spilling over a new page by a pixel fraction.
