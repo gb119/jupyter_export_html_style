@@ -100,18 +100,20 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     
-    - name: Set up Conda
+    - name: Set up Conda with Mamba
       uses: conda-incubator/setup-miniconda@v3
       with:
         auto-update-conda: true
         python-version: '3.11'
         channels: phygbu,conda-forge,defaults
         channel-priority: true
+        mamba-version: "*"
+        use-mamba: true
     
     - name: Install conda-build
       shell: bash -l {0}
       run: |
-        conda install conda-build anaconda-client
+        mamba install conda-build anaconda-client
     
     - name: Build conda package
       shell: bash -l {0}
