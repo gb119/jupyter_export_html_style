@@ -14,10 +14,8 @@ This package provides:
 
 __version__ = "0.0.6"
 
-from .exporter import StyledHTMLExporter
+from .exporters import StyledHTMLExporter, StyledSlidesExporter, StyledWebPDFExporter
 from .preprocessor import StylePreprocessor
-from .slides_exporter import StyledSlidesExporter
-from .webpdf_exporter import StyledWebPDFExporter
 
 __all__ = [
     "StylePreprocessor",

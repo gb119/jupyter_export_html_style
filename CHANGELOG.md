@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+- Refactored exporter modules into `exporters` sub-package with standardized naming
+  - `exporter.py` → `exporters/html.py`
+  - `slides_exporter.py` → `exporters/slides.py`
+  - `webpdf_exporter.py` → `exporters/webpdf.py`
+- Updated entry points to reference new module paths
+- Maintained backward compatibility through package-level imports
+
 ## [0.1.0] - 2026-01-11
 
 ### Added

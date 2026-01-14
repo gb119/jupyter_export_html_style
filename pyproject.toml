@@ -60,12 +60,12 @@ Repository = "https://github.com/gb119/jupyter_export_html_style"
 style = "jupyter_export_html_style.preprocessor:StylePreprocessor"
 
 [project.entry-points."nbconvert.exporters"]
-styled_html = "jupyter_export_html_style.exporter:StyledHTMLExporter"
-styled_webpdf = "jupyter_export_html_style.webpdf_exporter:StyledWebPDFExporter"
-styled_slides = "jupyter_export_html_style.slides_exporter:StyledSlidesExporter"
+styled_html = "jupyter_export_html_style.exporters.html:StyledHTMLExporter"
+styled_webpdf = "jupyter_export_html_style.exporters.webpdf:StyledWebPDFExporter"
+styled_slides = "jupyter_export_html_style.exporters.slides:StyledSlidesExporter"
 
 [tool.setuptools]
-packages = ["jupyter_export_html_style"]
+packages = ["jupyter_export_html_style", "jupyter_export_html_style.exporters"]
 
 [tool.setuptools.dynamic]
 version = {attr = "jupyter_export_html_style.__version__"}

@@ -393,8 +393,9 @@ The package registers the following nbconvert entry points:
 
 ### Exporters
 
-- `styled_html`: Points to `jupyter_export_html_style.exporter:StyledHTMLExporter`
-- `styled_webpdf`: Points to `jupyter_export_html_style.webpdf_exporter:StyledWebPDFExporter`
+- `styled_html`: Points to `jupyter_export_html_style.exporters.html:StyledHTMLExporter`
+- `styled_webpdf`: Points to `jupyter_export_html_style.exporters.webpdf:StyledWebPDFExporter`
+- `styled_slides`: Points to `jupyter_export_html_style.exporters.slides:StyledSlidesExporter`
 
 These can be used directly with nbconvert command line:
 

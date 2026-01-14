@@ -431,7 +431,21 @@ jupyter_export_html_style/
 ├── jupyter_export_html_style/    # Main Python package
 │   ├── __init__.py              # Package initialization
 │   ├── preprocessor.py          # nbconvert preprocessor
-│   └── exporter.py              # Custom HTML exporter
+│   ├── exporters/               # Exporters sub-package
+│   │   ├── __init__.py          # Exporters package initialization
+│   │   ├── html.py              # Custom HTML exporter
+│   │   ├── slides.py            # Reveal.js slides exporter
+│   │   └── webpdf.py            # WebPDF exporter
+│   └── templates/               # Jinja2 templates for exporters
+│       ├── styled/              # HTML exporter templates
+│       ├── styled_reveal/       # Slides exporter templates
+│       └── webpdf/              # WebPDF exporter templates
+├── tests/                       # Test suite
+│   ├── test_exporter.py
+│   ├── test_slides_exporter.py
+│   ├── test_webpdf_exporter.py
+│   ├── test_preprocessor.py
+│   └── test_integration.py
 ├── docs/                        # Documentation
 │   ├── source/                  # Sphinx documentation source
 │   │   ├── index.md
