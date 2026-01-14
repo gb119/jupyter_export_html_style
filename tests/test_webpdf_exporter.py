@@ -198,3 +198,71 @@ def test_styled_webpdf_html_includes_cell_styles():
     assert 'id="cell-1"' in html_captured
     assert 'id="cell-1-input"' in html_captured
     assert 'id="cell-2"' in html_captured
+
+
+@pytest.mark.skipif(not PLAYWRIGHT_AVAILABLE, reason="Playwright not installed")
+def test_styled_webpdf_uses_tagged_pdf():
+    """Test that the exporter passes tagged=True to page.pdf().
+
+    This test verifies that the StyledWebPDFExporter passes the tagged=True
+    parameter to Playwright's page.pdf() method, ensuring the output PDFs
+    are tagged for accessibility.
+    """
+    from unittest.mock import AsyncMock, MagicMock, patch
+
+    exporter = StyledWebPDFExporter()
+
+    # Create a simple notebook
+    nb = new_notebook(cells=[new_code_cell("print('test')")])
+
+    # Mock the playwright components
+    mock_pdf_data = b"%PDF-1.4 fake pdf data"
+    mock_page = AsyncMock()
+    mock_page.pdf = AsyncMock(return_value=mock_pdf_data)
+    mock_page.emulate_media = AsyncMock()
+    mock_page.goto = AsyncMock()
+    mock_page.wait_for_timeout = AsyncMock()
+    mock_page.evaluate = AsyncMock(return_value={"width": 800, "height": 600})
+
+    mock_browser = AsyncMock()
+    mock_browser.new_page = AsyncMock(return_value=mock_page)
+    mock_browser.close = AsyncMock()
+
+    mock_chromium = MagicMock()
+    mock_chromium.launch = AsyncMock(return_value=mock_browser)
+
+    mock_playwright = AsyncMock()
+    mock_playwright.chromium = mock_chromium
+    mock_playwright.stop = AsyncMock()
+
+    async def mock_async_playwright_start():
+        return mock_playwright
+
+    mock_async_playwright_instance = MagicMock()
+    mock_async_playwright_instance.start = mock_async_playwright_start
+
+    def mock_async_playwright():
+        return mock_async_playwright_instance
+
+    with patch(
+        "playwright.async_api.async_playwright",
+        mock_async_playwright,
+    ):
+        try:
+            output, resources = exporter.from_notebook_node(nb)
+
+            # Verify that page.pdf was called with tagged=True
+            mock_page.pdf.assert_called_once()
+            call_kwargs = mock_page.pdf.call_args.kwargs
+            assert "tagged" in call_kwargs, "tagged parameter not passed to page.pdf()"
+            assert call_kwargs["tagged"] is True, "tagged parameter is not True in page.pdf() call"
+            assert call_kwargs["print_background"] is True, "print_background should be True"
+
+            # Verify the output
+            assert output == mock_pdf_data
+            assert resources["output_extension"] == ".pdf"
+
+        except RuntimeError as e:
+            if "No suitable chromium executable" in str(e):
+                pytest.skip("Chromium not installed")
+            raise
