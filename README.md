@@ -382,6 +382,30 @@ Multiple stylesheets (mixed local and remote):
 }
 ```
 
+#### Controlling Header Anchor Links
+
+By default, the HTML exporter adds anchor links (¶) to headings in markdown cells, allowing users to link directly to specific sections. You can control this behavior using the `anchors` metadata field:
+
+Disable anchor links:
+```json
+{
+  "metadata": {
+    "anchors": false
+  }
+}
+```
+
+Explicitly enable anchor links (this is the default):
+```json
+{
+  "metadata": {
+    "anchors": true
+  }
+}
+```
+
+**Note:** When anchor links are disabled, headings will not include the clickable ¶ symbol or the ID attribute, making them cleaner but non-linkable.
+
 ### Reveal.js Slides Styling
 
 When exporting to Reveal.js slides, all the same styling options work:

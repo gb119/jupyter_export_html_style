@@ -1038,3 +1038,76 @@ def test_custom_classes_and_styles_together():
     assert "background-color" in css_rules["#cell-0"]
     assert "#cell-0-input" in css_rules
     assert "border" in css_rules["#cell-0-input"]
+
+
+def test_anchor_links_included_by_default():
+    """Test that anchor links are included by default in exported HTML."""
+    exporter = StyledHTMLExporter()
+
+    nb = new_notebook(cells=[new_markdown_cell("# Header 1\n\n## Header 2")])
+
+    output, resources = exporter.from_notebook_node(nb)
+
+    # Anchor links should be present by default
+    assert 'class="anchor-link"' in output
+    assert 'href="#Header-1"' in output
+    assert 'href="#Header-2"' in output
+
+
+def test_anchor_links_excluded_when_metadata_false():
+    """Test that anchor links are excluded when notebook metadata anchors=False."""
+    exporter = StyledHTMLExporter()
+
+    nb = new_notebook(cells=[new_markdown_cell("# Header 1\n\n## Header 2")])
+    nb.metadata["anchors"] = False
+
+    output, resources = exporter.from_notebook_node(nb)
+
+    # Anchor links should NOT be present when metadata.anchors is False
+    assert 'class="anchor-link"' not in output
+    # When exclude_anchor_links is True, nbconvert also doesn't add IDs to headers
+    # This is the expected behavior from nbconvert
+    assert '<h1>Header 1</h1>' in output
+    assert '<h2>Header 2</h2>' in output
+
+
+def test_anchor_links_included_when_metadata_true():
+    """Test that anchor links are included when notebook metadata anchors=True."""
+    exporter = StyledHTMLExporter()
+
+    nb = new_notebook(cells=[new_markdown_cell("# Title\n\n### Subtitle")])
+    nb.metadata["anchors"] = True
+
+    output, resources = exporter.from_notebook_node(nb)
+
+    # Anchor links should be present when explicitly set to True
+    assert 'class="anchor-link"' in output
+    assert 'href="#Title"' in output
+    assert 'href="#Subtitle"' in output
+
+
+def test_anchor_links_metadata_multiple_exports():
+    """Test that anchor links metadata works correctly across multiple exports."""
+    exporter = StyledHTMLExporter()
+
+    # First export with anchors=False
+    nb1 = new_notebook(cells=[new_markdown_cell("# First Header")])
+    nb1.metadata["anchors"] = False
+
+    output1, _ = exporter.from_notebook_node(nb1)
+    assert 'class="anchor-link"' not in output1
+
+    # Second export with anchors=True (or default)
+    nb2 = new_notebook(cells=[new_markdown_cell("# Second Header")])
+    nb2.metadata["anchors"] = True
+
+    output2, _ = exporter.from_notebook_node(nb2)
+    assert 'class="anchor-link"' in output2
+    assert 'href="#Second-Header"' in output2
+
+    # Third export without metadata (should include anchors by default)
+    nb3 = new_notebook(cells=[new_markdown_cell("# Third Header")])
+
+    output3, _ = exporter.from_notebook_node(nb3)
+    assert 'class="anchor-link"' in output3
+    assert 'href="#Third-Header"' in output3
