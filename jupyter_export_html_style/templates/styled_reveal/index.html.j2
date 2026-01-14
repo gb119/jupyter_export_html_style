@@ -1,0 +1,59 @@
+{%- extends 'reveal/index.html.j2' -%}
+
+{#
+  Styled Reveal.js slides export template.
+  This extends the reveal index template and adds custom style injection.
+  Uses data-cell-index attributes instead of IDs to avoid conflicts with reveal.js.
+#}
+
+{% block html_head_css %}
+{{ super() }}
+{#- Inject custom cell styles if present -#}
+{%- if resources.styles -%}
+<style>
+/* Custom cell styles */
+{%- for cell_id, style in resources.styles.items() %}
+  {#- Convert cell-0, cell-1, etc. to data-cell-index selectors -#}
+  {%- if cell_id.startswith('cell-') and cell_id[5:].replace('-input', '').replace('-output', '').isdigit() -%}
+    {%- if cell_id.endswith('-input') -%}
+      {%- set cell_num = cell_id[5:-6] -%}
+[data-cell-index="{{ cell_num }}"] .jp-Cell-inputWrapper {
+    {%- if style is mapping -%}
+      {%- for k, v in style.items() %}
+  {{ k }}: {{ v }};
+      {%- endfor -%}
+    {%- elif style is string %}
+  {{ style }}
+    {%- endif %}
+}
+    {%- elif cell_id.endswith('-output') -%}
+      {%- set cell_num = cell_id[5:-7] -%}
+[data-cell-index="{{ cell_num }}"] .jp-Cell-outputWrapper {
+    {%- if style is mapping -%}
+      {%- for k, v in style.items() %}
+  {{ k }}: {{ v }};
+      {%- endfor -%}
+    {%- elif style is string %}
+  {{ style }}
+    {%- endif %}
+}
+    {%- else -%}
+      {%- set cell_num = cell_id[5:] -%}
+[data-cell-index="{{ cell_num }}"] {
+    {%- if style is mapping -%}
+      {%- for k, v in style.items() %}
+  {{ k }}: {{ v }};
+      {%- endfor -%}
+    {%- elif style is string %}
+  {{ style }}
+    {%- endif %}
+}
+    {%- endif -%}
+  {%- endif -%}
+{%- endfor -%}
+</style>
+{%- endif -%}
+
+{#- Notebook-level styles and stylesheets are handled by post-processing in exporter.py
+     This allows local/relative stylesheets to be embedded as inline styles -#}
+{% endblock html_head_css %}

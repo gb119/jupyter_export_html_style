@@ -62,6 +62,7 @@ style = "jupyter_export_html_style.preprocessor:StylePreprocessor"
 [project.entry-points."nbconvert.exporters"]
 styled_html = "jupyter_export_html_style.exporter:StyledHTMLExporter"
 styled_webpdf = "jupyter_export_html_style.webpdf_exporter:StyledWebPDFExporter"
+styled_slides = "jupyter_export_html_style.slides_exporter:StyledSlidesExporter"
 
 [tool.setuptools]
 packages = ["jupyter_export_html_style"]

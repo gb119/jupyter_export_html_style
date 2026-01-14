@@ -16,6 +16,13 @@ __version__ = "0.0.6"
 
 from .exporter import StyledHTMLExporter
 from .preprocessor import StylePreprocessor
+from .slides_exporter import StyledSlidesExporter
 from .webpdf_exporter import StyledWebPDFExporter
 
-__all__ = ["StylePreprocessor", "StyledHTMLExporter", "StyledWebPDFExporter", "__version__"]
+__all__ = [
+    "StylePreprocessor",
+    "StyledHTMLExporter",
+    "StyledSlidesExporter",
+    "StyledWebPDFExporter",
+    "__version__",
+]
