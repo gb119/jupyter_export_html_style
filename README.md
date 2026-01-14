@@ -13,6 +13,7 @@ A JupyterLab extension and nbconvert preprocessor/exporter that allows custom ce
 
 - 🎨 **Custom Cell Styling**: Apply CSS styles to individual cells via metadata
 - 🎯 **Input/Output Styling**: Separate styles for cell inputs and outputs
+- 🏷️ **Custom CSS Classes**: Add custom CSS classes to cells, inputs, and outputs for use with external stylesheets
 - 📝 **Notebook-Level Styling**: Add custom styles and stylesheets to the entire notebook
 - 📦 **Resource Embedding**: Automatically embeds local CSS files as inline styles for self-contained HTML
 - 🖼️ **Image Embedding**: Embeds images as base64 data URIs for self-contained HTML exports
@@ -226,6 +227,93 @@ Style the input and output areas of cells separately:
     "background-color": "#e8f5e9",
     "font-family": "monospace"
   }
+}
+```
+
+### Custom CSS Classes
+
+Apply custom CSS classes to cells and their components using the `class`, `input-class`, and `output-class` metadata. These classes are added to the HTML elements alongside the standard JupyterLab classes, allowing you to use external stylesheets or define custom styles in the notebook-level metadata.
+
+#### Cell-Level Classes
+
+Add custom CSS classes to an entire cell:
+
+```json
+{
+  "class": "highlight-important warning-cell"
+}
+```
+
+This adds the specified classes to the cell's `<div>` element, e.g.:
+```html
+<div class="jp-Cell jp-CodeCell jp-Notebook-cell highlight-important warning-cell">
+```
+
+#### Input and Output Classes
+
+Add custom classes to input and output areas separately:
+
+```json
+{
+  "input-class": "code-highlight",
+  "output-class": "result-highlight"
+}
+```
+
+#### Combined Classes and Styles
+
+You can use both custom classes and inline styles together:
+
+```json
+{
+  "class": "important-cell",
+  "style": {
+    "margin": "20px 0"
+  },
+  "input-class": "code-section",
+  "input-style": {
+    "border-left": "4px solid #2196f3"
+  }
+}
+```
+
+#### Using Custom Classes with External Stylesheets
+
+Define your styles in a CSS file and reference them in the notebook metadata:
+
+**custom-styles.css:**
+```css
+.highlight-important {
+  background-color: #fff9c4;
+  border: 2px solid #fbc02d;
+}
+
+.code-highlight {
+  background-color: #f5f5f5;
+  font-size: 1.1em;
+}
+
+.result-highlight {
+  background-color: #e8f5e9;
+  border-left: 4px solid #4caf50;
+}
+```
+
+**Notebook metadata:**
+```json
+{
+  "metadata": {
+    "stylesheet": "custom-styles.css"
+  }
+}
+```
+
+**Cell metadata:**
+```json
+{
+  "class": "highlight-important",
+  "input-class": "code-highlight",
+  "output-class": "result-highlight"
 }
 ```
 

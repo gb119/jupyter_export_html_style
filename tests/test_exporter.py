@@ -917,9 +917,7 @@ def test_output_with_custom_class():
 
     cell = new_code_cell("print('hello')")
     # Add an actual output to the cell
-    cell.outputs = [
-        nbf.v4.new_output(output_type="stream", name="stdout", text="hello\n")
-    ]
+    cell.outputs = [nbf.v4.new_output(output_type="stream", name="stdout", text="hello\n")]
     cell.metadata["output-class"] = "custom-output"
 
     nb = new_notebook(cells=[cell])
@@ -940,9 +938,7 @@ def test_cell_with_all_custom_classes():
 
     cell = new_code_cell("result = 42")
     # Add an output to the cell
-    cell.outputs = [
-        nbf.v4.new_output(output_type="execute_result", data={"text/plain": "42"})
-    ]
+    cell.outputs = [nbf.v4.new_output(output_type="execute_result", data={"text/plain": "42"})]
     cell.metadata["class"] = "highlight-cell"
     cell.metadata["input-class"] = "highlight-input"
     cell.metadata["output-class"] = "highlight-output"

@@ -275,6 +275,116 @@ Style the input and output areas of a cell separately:
 }
 ```
 
+### Example 2b: Custom CSS Classes
+
+Instead of (or in addition to) inline styles, you can apply custom CSS classes to cells and their components. This is useful when working with external stylesheets.
+
+#### Cell-Level Classes
+
+Add custom CSS classes to the cell container:
+
+```json
+{
+  "class": "highlight-important"
+}
+```
+
+You can also add multiple classes:
+
+```json
+{
+  "class": "highlight-important warning-cell bordered"
+}
+```
+
+#### Input and Output Classes
+
+Apply custom classes to input and output areas separately:
+
+```json
+{
+  "input-class": "code-highlight",
+  "output-class": "result-highlight"
+}
+```
+
+#### Combining Classes and Styles
+
+Use both custom classes and inline styles together:
+
+```json
+{
+  "class": "important-cell",
+  "style": {
+    "margin": "20px 0"
+  },
+  "input-class": "code-section",
+  "input-style": {
+    "border-left": "4px solid #2196f3"
+  },
+  "output-class": "result-section",
+  "output-style": {
+    "background-color": "#f0f0f0"
+  }
+}
+```
+
+#### Using with External Stylesheets
+
+Define your CSS classes in a separate stylesheet and reference it in the notebook metadata:
+
+**custom-styles.css:**
+```css
+.highlight-important {
+  background-color: #fff9c4;
+  border: 2px solid #fbc02d;
+  padding: 12px;
+  margin: 8px 0;
+}
+
+.code-highlight {
+  background-color: #f5f5f5;
+  border-left: 4px solid #2196f3;
+  padding: 10px;
+  font-family: 'Courier New', monospace;
+}
+
+.result-highlight {
+  background-color: #e8f5e9;
+  border-left: 4px solid #4caf50;
+  padding: 10px;
+}
+
+.warning-cell {
+  border: 2px dashed #ff9800;
+}
+
+.bordered {
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+```
+
+**Notebook metadata:**
+```json
+{
+  "metadata": {
+    "stylesheet": "custom-styles.css"
+  }
+}
+```
+
+**Cell metadata:**
+```json
+{
+  "class": "highlight-important bordered",
+  "input-class": "code-highlight",
+  "output-class": "result-highlight"
+}
+```
+
+When exported, the local stylesheet will be embedded inline, and your custom classes will be applied to the appropriate HTML elements.
+
 ### Example 3: Error/Warning Styling
 
 ```json
