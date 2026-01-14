@@ -10,7 +10,7 @@ from importlib import util as importlib_util
 
 from traitlets import Bool, default
 
-from .exporter import StyledHTMLExporter
+from .html import StyledHTMLExporter
 
 PLAYWRIGHT_INSTALLED = importlib_util.find_spec("playwright") is not None
 IS_WINDOWS = os.name == "nt"

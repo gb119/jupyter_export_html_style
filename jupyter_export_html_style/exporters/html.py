@@ -10,7 +10,7 @@ import bs4
 from nbconvert.exporters import HTMLExporter
 from traitlets import Unicode
 
-from .preprocessor import StylePreprocessor
+from ..preprocessor import StylePreprocessor
 
 
 class StyledHTMLExporter(HTMLExporter):
@@ -71,7 +71,7 @@ class StyledHTMLExporter(HTMLExporter):
                 HTMLExporter class.
         """
         # Add custom template directory to the search path before initialization
-        template_path = os.path.join(os.path.dirname(__file__), "templates")
+        template_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "templates")
         if "extra_template_basedirs" in kw:
             if template_path not in kw["extra_template_basedirs"]:
                 kw["extra_template_basedirs"].insert(0, template_path)

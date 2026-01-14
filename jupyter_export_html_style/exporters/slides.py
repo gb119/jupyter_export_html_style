@@ -2,7 +2,7 @@
 
 from traitlets import Bool, Unicode, default
 
-from .exporter import StyledHTMLExporter
+from .html import StyledHTMLExporter
 
 
 class StyledSlidesExporter(StyledHTMLExporter):
@@ -218,6 +218,7 @@ class StyledSlidesExporter(StyledHTMLExporter):
             # Use HTMLExporter's from_notebook_node to skip StyledHTMLExporter's
             # post-processing since the template handles it
             from nbconvert.exporters import HTMLExporter
+
             output, resources = HTMLExporter.from_notebook_node(self, nb, resources, **kw)
         finally:
             # Restore embed_images setting
