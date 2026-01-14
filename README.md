@@ -18,6 +18,7 @@ A JupyterLab extension and nbconvert preprocessor/exporter that allows custom ce
 - 🖼️ **Image Embedding**: Embeds images as base64 data URIs for self-contained HTML exports
 - 🔧 **nbconvert Integration**: Seamlessly integrates with nbconvert's export pipeline
 - 📄 **PDF Export with Styles**: Export to PDF via HTML with all custom styles applied
+- 🎭 **Reveal.js Slides with Styles**: Create presentation slides with custom cell styling
 - 🚀 **Easy to Use**: Simple metadata-based configuration
 
 
@@ -106,14 +107,46 @@ pip install nbconvert[webpdf]
 playwright install chromium
 ```
 
+#### Reveal.js Slides Export (with Styles)
+
+Export to Reveal.js presentation slides with all custom styles applied:
+
+From the command line:
+
+```bash
+jupyter nbconvert --to styled_slides notebook.ipynb
+```
+
+Or using Python:
+
+```python
+from jupyter_export_html_style import StyledSlidesExporter
+
+exporter = StyledSlidesExporter()
+(body, resources) = exporter.from_filename('notebook.ipynb')
+```
+
+**Note**: For slides to work properly, cells should have slideshow metadata. In JupyterLab, use **View → Activate Presentation Mode** to set slide types for cells.
+
+You can also customize the Reveal.js theme and other options:
+
+```python
+exporter = StyledSlidesExporter(
+    reveal_theme='moon',
+    reveal_transition='fade',
+    reveal_number='c/t'
+)
+```
+
 #### JupyterLab Integration
 
 In JupyterLab, the exporters are available in the **File → Save and Export Notebook As...** menu with user-friendly names:
 
 - **HTML (with styles)** - Export to HTML with custom cell and notebook styles
 - **PDF via HTML (with styles)** - Export to PDF via HTML with custom styles applied
+- **Reveal.js slides (with styles)** - Export to Reveal.js presentation slides with custom styles
 
-These menu entries correspond to the `styled_html` and `styled_webpdf` exporters used in the command line examples above.
+These menu entries correspond to the `styled_html`, `styled_webpdf`, and `styled_slides` exporters used in the command line examples above.
 
 ## Usage Examples
 
@@ -255,6 +288,76 @@ Multiple stylesheets (mixed local and remote):
   }
 }
 ```
+
+### Reveal.js Slides Styling
+
+When exporting to Reveal.js slides, all the same styling options work:
+
+#### Styling Individual Slides
+
+```json
+{
+  "metadata": {
+    "slideshow": {
+      "slide_type": "slide"
+    },
+    "style": {
+      "background": "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+      "color": "white"
+    }
+  }
+}
+```
+
+#### Styling Slide Content
+
+You can style the input and output areas of code cells in slides:
+
+```json
+{
+  "metadata": {
+    "slideshow": {
+      "slide_type": "slide"
+    },
+    "input-style": {
+      "font-size": "1.2em",
+      "background-color": "#2d2d2d"
+    },
+    "output-style": {
+      "border-left": "4px solid #4CAF50"
+    }
+  }
+}
+```
+
+#### Customizing Reveal.js Options
+
+You can customize the Reveal.js presentation settings:
+
+From the command line:
+```bash
+jupyter nbconvert --to styled_slides notebook.ipynb \
+  --SlidesExporter.reveal_theme=moon \
+  --SlidesExporter.reveal_transition=fade \
+  --SlidesExporter.reveal_scroll=true
+```
+
+Or in Python:
+```python
+from jupyter_export_html_style import StyledSlidesExporter
+
+exporter = StyledSlidesExporter(
+    reveal_theme='moon',
+    reveal_transition='fade',
+    reveal_scroll=True,
+    reveal_number='c/t'
+)
+output, resources = exporter.from_filename('notebook.ipynb')
+```
+
+Available reveal.js themes include: `black`, `white`, `league`, `beige`, `sky`, `night`, `serif`, `simple`, `solarized`, `blood`, `moon`.
+
+Available transitions include: `none`, `fade`, `slide`, `convex`, `concave`, `zoom`.
 
 ## Building from Source
 

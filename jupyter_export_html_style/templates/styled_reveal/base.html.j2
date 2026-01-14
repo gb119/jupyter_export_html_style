@@ -1,0 +1,37 @@
+{%- extends 'reveal/base.html.j2' -%}
+{%- from 'celltags.j2' import celltags -%}
+{%- from 'cell_id_anchor.j2' import cell_id_anchor -%}
+
+{#
+  Override cell blocks to add data-cell-index attributes for styling.
+  This allows the StylePreprocessor's cell-{index} style IDs to work
+  without breaking reveal.js functionality that depends on cell-id attributes.
+#}
+
+{%- block codecell -%}
+{%- if not cell.outputs -%}
+{%- set no_output_class="jp-mod-noOutputs" -%}
+{%- endif -%}
+{%- if not resources.global_content_filter.include_input -%}
+{%- set no_input_class="jp-mod-noInput" -%}
+{%- endif -%}
+{#- Generate cell index for styling -#}
+{%- set cell_index = loop.index0 -%}
+<div {{ cell_id_anchor(cell) }} class="jp-Cell jp-CodeCell jp-Notebook-cell {{ no_output_class }} {{ no_input_class }} {{ celltags(cell) }}" data-cell-index="{{ cell_index }}">
+{{ super() }}
+</div>
+{%- endblock codecell -%}
+
+{%- block markdowncell scoped -%}
+{%- set cell_index = loop.index0 -%}
+<div {{ cell_id_anchor(cell) }} class="jp-Cell jp-MarkdownCell jp-Notebook-cell {{ celltags(cell) }}" data-cell-index="{{ cell_index }}">
+{{ super() }}
+</div>
+{%- endblock markdowncell -%}
+
+{%- block rawcell scoped -%}
+{%- set cell_index = loop.index0 -%}
+<div {{ cell_id_anchor(cell) }} class="jp-Cell jp-RawCell jp-Notebook-cell {{ celltags(cell) }}" data-cell-index="{{ cell_index }}">
+{{ super() }}
+</div>
+{%- endblock rawcell -%}
