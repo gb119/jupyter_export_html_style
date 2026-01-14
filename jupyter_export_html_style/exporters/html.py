@@ -120,7 +120,7 @@ class StyledHTMLExporter(HTMLExporter):
         # Check notebook metadata for anchor links preference
         # If metadata.anchors is False, exclude anchor links
         # Default is to include anchor links (backward compatible)
-        if hasattr(nb, "metadata") and "anchors" in nb.metadata:
+        if "anchors" in nb.metadata:
             self.exclude_anchor_links = not nb.metadata["anchors"]
 
         # Save the user's embed_images preference
