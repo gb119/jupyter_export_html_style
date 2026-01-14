@@ -29,7 +29,7 @@ test:
   imports:
     - jupyter_export_html_style
     - jupyter_export_html_style.preprocessor
-    - jupyter_export_html_style.exporter
+    - jupyter_export_html_style.exporters
   commands:
     - python -c "import jupyter_export_html_style; print(jupyter_export_html_style.__version__)"
 
