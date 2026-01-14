@@ -205,6 +205,84 @@ When the JupyterLab extension is installed, you can:
 2. Configure default styles in JupyterLab settings
 3. Preview styled exports before saving
 
+## Visual Examples Gallery
+
+Below are rendered examples showing what different styling options look like when exported to HTML. These examples demonstrate the visual impact of various styling techniques.
+
+### Cell-Level Styling Examples
+
+This example demonstrates various cell-level styling options including highlighted cells, error/warning styles, success messages, gradient backgrounds, and shadow effects.
+
+![Cell Styling Examples](examples/cell_styling.png)
+
+**Features shown:**
+- Yellow highlighted important cells with dashed borders
+- Error/warning cells with red left border
+- Success cells with green accents
+- Gradient backgrounds for section headers
+- Box shadows for elevated card-like appearance
+
+[📓 View Notebook](examples/cell_styling.ipynb) | [🌐 View HTML](examples/cell_styling.html)
+
+### Input and Output Styling
+
+This example shows how to apply different styles to the input (code) and output (results) areas of code cells independently.
+
+![Input Output Styling](examples/input_output_styling.png)
+
+**Features shown:**
+- Blue-accented input areas with custom fonts
+- Green-themed output areas with borders
+- Combined styling with contrasting input/output colors
+- Gradient backgrounds for code sections
+- Custom padding and borders
+
+[📓 View Notebook](examples/input_output_styling.ipynb) | [🌐 View HTML](examples/input_output_styling.html)
+
+### Custom CSS Classes
+
+This example demonstrates using custom CSS classes with an external stylesheet for reusable, maintainable styling.
+
+![Custom Classes](examples/custom_classes.png)
+
+**Features shown:**
+- Custom CSS classes from external stylesheet
+- Reusable style definitions
+- Dark-themed code highlighting
+- Class-based styling combined with inline styles
+
+[📓 View Notebook](examples/custom_classes.ipynb) | [🌐 View HTML](examples/custom_classes.html) | [📄 Stylesheet](examples/custom-styles.css)
+
+### Notebook-Level Styling
+
+This example shows how to apply global styles that affect the entire notebook, creating a cohesive, professional appearance.
+
+![Notebook Styling](examples/notebook_styling.png)
+
+**Features shown:**
+- Global font and layout settings
+- Consistent spacing and shadows on all cells
+- Colored left borders to distinguish cell types
+- Maximum width for better readability
+- Light gray page background
+
+[📓 View Notebook](examples/notebook_styling.ipynb) | [🌐 View HTML](examples/notebook_styling.html)
+
+### Comprehensive Demo
+
+This comprehensive example combines multiple styling techniques in a single notebook to create a polished, professional document.
+
+![Comprehensive Demo](examples/comprehensive_demo.png)
+
+**Features shown:**
+- Gradient header with centered text
+- Color-coded sections (warnings, info, results)
+- Combined cell, input, and output styling
+- Box shadows and rounded corners
+- Professional color scheme throughout
+
+[📓 View Notebook](examples/comprehensive_demo.ipynb) | [🌐 View HTML](examples/comprehensive_demo.html)
+
 ## Examples
 
 ### Example 1: Cell-Level Styling
